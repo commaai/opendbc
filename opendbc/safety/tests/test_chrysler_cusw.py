@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 import unittest
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 
 
 class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
+  DBC = "chrysler_cusw"
+  SAFETY_MODEL = CarParams.SafetyModel.chryslerCusw
+
   TX_MSGS = [[0x1F6, 0], [0x2FA, 0], [0x5DC, 0]]
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x1F6, 0x5DC)}
   FWD_BLACKLISTED_ADDRS = {2: [0x1F6, 0x5DC]}
 
@@ -17,12 +17,6 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
   MAX_TORQUE_LOOKUP = [0], [250]
   MAX_RT_DELTA = 150
   MAX_TORQUE_ERROR = 80
-
-  def setUp(self):
-    self.packer = CANPackerSafety("chrysler_cusw")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.chryslerCusw, 0)
-    self.safety.init_tests()
 
   def _button_msg(self, cancel=False, resume=False):
     values = {"ACC_Cancel": cancel, "ACC_Resume": resume}
@@ -56,19 +50,13 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
 
+      self.assertFalse(self._tx(self._button_msg()))
+
       # resume only while controls allowed
       self.assertEqual(controls_allowed, self._tx(self._button_msg(resume=True)))
 
       # can always cancel
       self.assertTrue(self._tx(self._button_msg(cancel=True)))
-
-  def test_rx_hook(self):
-    for count in range(20):
-      self.assertTrue(self._rx(self._speed_msg(0)), f"{count=}")
-      self.assertTrue(self._rx(self._user_brake_msg(False)), f"{count=}")
-      self.assertTrue(self._rx(self._torque_meas_msg(0)), f"{count=}")
-      self.assertTrue(self._rx(self._user_gas_msg(0)), f"{count=}")
-      self.assertTrue(self._rx(self._pcm_status_msg(False)), f"{count=}")
 
 
 if __name__ == "__main__":

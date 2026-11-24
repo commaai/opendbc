@@ -42,7 +42,8 @@ class CarInterface(CarInterfaceBase):
         # this needs to be figured out for cars without an ADAS ECU
         ret.alphaLongitudinalAvailable = False
 
-      ret.enableBsm = 0x1ba in fingerprint[CAN.ECAN]
+      if 0x1ba in fingerprint[CAN.ECAN]:
+        ret.flags |= HyundaiFlags.HAS_BSM.value
 
       # Check if the car is hybrid. Only HEV/PHEV cars have 0xFA on E-CAN.
       if 0xFA in fingerprint[CAN.ECAN]:
@@ -85,7 +86,8 @@ class CarInterface(CarInterfaceBase):
     else:
       # Shared configuration for non CAN-FD cars
       ret.alphaLongitudinalAvailable = not (ret.flags & (HyundaiFlags.LEGACY | HyundaiFlags.UNSUPPORTED_LONGITUDINAL))
-      ret.enableBsm = 0x58b in fingerprint[0]
+      if 0x58b in fingerprint[0]:
+        ret.flags |= HyundaiFlags.HAS_BSM.value
 
       # Send LFA message on cars with HDA
       if 0x485 in fingerprint[2]:

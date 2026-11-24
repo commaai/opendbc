@@ -2,14 +2,15 @@
 import unittest
 
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 
 LANE_KEEP_ASSIST = 0x3F2
 
 
 class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
+  DBC = "psa_aee2010_r3"
+  SAFETY_MODEL = CarParams.SafetyModel.psa
+
   RELAY_MALFUNCTION_ADDRS = {0: (LANE_KEEP_ASSIST,)}
   FWD_BLACKLISTED_ADDRS = {2: [LANE_KEEP_ASSIST]}
   TX_MSGS = [[1010, 0]]
@@ -24,12 +25,6 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   ANGLE_RATE_BP = [0., 5., 25.]
   ANGLE_RATE_UP = [2.5, 1.5, .2]
   ANGLE_RATE_DOWN = [5., 2., .3]
-
-  def setUp(self):
-    self.packer = CANPackerSafety("psa_aee2010_r3")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
-    self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, enabled: bool):
     values = {"SET_ANGLE": angle, "TORQUE_FACTOR": 100 if enabled else 0}
@@ -55,35 +50,20 @@ class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"P002_Com_rAPP": int(gas * 100)}
     return self.packer.make_can_msg_safety("Dyn_CMM", self.MAIN_BUS, values)
 
-  def test_rx_hook(self):
-    # speed
-    for _ in range(10):
-      self.assertTrue(self._rx(self._speed_msg(0)))
-    msg = self._speed_msg(0)
-    # invalidate checksum
-    msg[0].data[5] = 0x00
-    self.assertFalse(self._rx(msg))
 
-    # cruise
-    for _ in range(10):
-      self.assertTrue(self._rx(self._pcm_status_msg(0)))
-    msg = self._pcm_status_msg(0)
-    # invalidate checksum
-    msg[0].data[5] = 0x00
-    self.assertFalse(self._rx(msg))
-    msg = self._pcm_status_msg(0)
-    # write to unused payload byte
-    msg[0].data[6] = 0xAB
-    self.assertTrue(self._rx(msg))
+class TestPsaIgnition(common.CanIgnitionSafetyTest):
+  IGNITION_VALUES = range(4)
+  IGNITION_ON_VALUES = {1, 2, 3}  # IS_DAT_BSI_432->ETAT_PRINCIP_SEV 0=stop, 1=ignition on, 2=cranking
+  IGNITION_COUNTER_MOD = 16
+  IGNITION_BUSES = (0, 2)  # the BSI is on bus 2 and only reaches bus 0 while the relay is open
+
+  def _ignition_msg(self, value, counter=None, bus=0):
+    assert counter is not None  # IGNITION_COUNTER_MOD is set
+    return common.make_msg(bus, 0x432, dat=bytes([0, counter, 0, 0, 0, 0, value, 0]))
 
 
 class TestPsaStockSafety(TestPsaSafetyBase):
-
-  def setUp(self):
-    self.packer = CANPackerSafety("psa_aee2010_r3")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
-    self.safety.init_tests()
+  pass
 
 
 if __name__ == "__main__":

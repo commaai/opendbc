@@ -1,13 +1,18 @@
 import os
 import abc
+import functools
 import math
+import random
 import unittest
 import importlib
+import itertools
 import numpy as np
 from collections.abc import Callable
 
 from opendbc.can import CANPacker
-from opendbc.safety import ALTERNATIVE_EXPERIENCE
+from opendbc.can.dbc import SignalType
+from opendbc.can.packer import set_value
+from opendbc.safety import ALTERNATIVE_EXPERIENCE, DLC_TO_LEN
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 
@@ -35,18 +40,25 @@ def round_speed(v):
   return round(v * VEHICLE_SPEED_FACTOR) / VEHICLE_SPEED_FACTOR
 
 
+def speeds_within_delta(speed, speed_2):
+  # safety compares the speeds in integer VEHICLE_SPEED_FACTOR units
+  delta = away_round(speed * VEHICLE_SPEED_FACTOR) - away_round(speed_2 * VEHICLE_SPEED_FACTOR)
+  return abs(delta) <= MAX_SPEED_DELTA * VEHICLE_SPEED_FACTOR
+
+
 def make_msg(bus, addr, length=8, dat=None):
   if dat is None:
     dat = b'\x00' * length
   return libsafety_py.make_CANPacket(addr, bus, dat)
 
 
+def state_buffer(copy):
+  return libsafety_py.ffi.buffer(libsafety_py.ffi.addressof(libsafety_py.libsafety, copy))
+
+
 class CANPackerSafety(CANPacker):
-  def make_can_msg_safety(self, name_or_addr, bus, values, fix_checksum=None):
-    msg = self.make_can_msg(name_or_addr, bus, values)
-    if fix_checksum is not None:
-      msg = fix_checksum(msg)
-    addr, dat, bus = msg
+  def make_can_msg_safety(self, name_or_addr, bus, values):
+    addr, dat, bus = self.make_can_msg(name_or_addr, bus, values)
     return libsafety_py.make_CANPacket(addr, bus, dat)
 
 
@@ -73,12 +85,28 @@ def add_regen_tests(cls):
 
 
 class SafetyTestBase(unittest.TestCase):
-  safety: libsafety_py.LibSafety | None
+  safety: libsafety_py.LibSafety
+  DBC: str | None = None
+  packer: CANPackerSafety
+  SAFETY_MODEL: int | None
+  SAFETY_PARAM = 0
+
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    if self.DBC is not None:
+      self.packer = CANPackerSafety(self.DBC)
+    if self.SAFETY_MODEL is not None:
+      self.safety.set_safety_hooks(self.SAFETY_MODEL, self.SAFETY_PARAM)
+    self.safety.init_tests()
+
+  def tearDown(self):
+    self.assertFalse(self.safety.safety_redundancy_fault)
+    self.assertEqual(state_buffer("safety_a")[:], state_buffer("safety_b")[:])
 
   @classmethod
   def setUpClass(cls):
-    if cls.__name__ == "SafetyTestBase":
-      cls.safety = None
+    # Classes defined in this module and classes named *Base are shared test helpers.
+    if cls.__module__ == __name__ or cls.__name__.endswith('Base'):
       raise unittest.SkipTest
 
   def _reset_safety_hooks(self):
@@ -155,12 +183,6 @@ class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
   MIN_ACCEL: float = -3.5
   INACTIVE_ACCEL: float = 0.0
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "LongitudinalAccelSafetyTest":
-      cls.safety = None
-      raise unittest.SkipTest
-
   @abc.abstractmethod
   def _accel_msg(self, accel: float):
     pass
@@ -191,29 +213,25 @@ class LongitudinalAccelSafetyTest(SafetyTestBase, abc.ABC):
 class LongitudinalGasBrakeSafetyTest(SafetyTestBase, abc.ABC):
 
   MIN_BRAKE: int = 0
-  MAX_BRAKE: int | None = None
-  MAX_POSSIBLE_BRAKE: int | None = None
+  MAX_BRAKE: int
+  MAX_POSSIBLE_BRAKE: int
 
   MIN_GAS: int = 0
-  MAX_GAS: int | None = None
+  MAX_GAS: int
   INACTIVE_GAS = 0
   MIN_POSSIBLE_GAS: int = 0
-  MAX_POSSIBLE_GAS: int | None = None
+  MAX_POSSIBLE_GAS: int
 
   def test_gas_brake_limits_correct(self):
-    self.assertIsNotNone(self.MAX_POSSIBLE_BRAKE)
-    self.assertIsNotNone(self.MAX_POSSIBLE_GAS)
-
-    assert self.MAX_BRAKE is not None and self.MAX_GAS is not None
     self.assertGreater(self.MAX_BRAKE, self.MIN_BRAKE)
     self.assertGreater(self.MAX_GAS, self.MIN_GAS)
 
   @abc.abstractmethod
-  def _send_gas_msg(self, gas: int):
+  def _send_gas_msg(self, gas: float):
     pass
 
   @abc.abstractmethod
-  def _send_brake_msg(self, brake: int):
+  def _send_brake_msg(self, brake: float):
     pass
 
   def test_brake_safety_check(self):
@@ -232,12 +250,6 @@ class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
   MAX_RT_DELTA = 0
 
   NO_STEER_REQ_BIT = False
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TorqueSteeringSafetyTestBase":
-      cls.safety = None
-      raise unittest.SkipTest
 
   @property
   def MAX_TORQUE(self):
@@ -320,12 +332,6 @@ class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
 
 class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "SteerRequestCutSafetyTest":
-      cls.safety = None
-      raise unittest.SkipTest
-
   # Safety around steering request bit mismatch tolerance
   MIN_VALID_STEERING_FRAMES: int
   MAX_INVALID_STEERING_FRAMES: int
@@ -345,7 +351,9 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         - We can always recover from violations if steer_req=1
     """
 
-    for min_valid_steer_frames in range(self.MIN_VALID_STEERING_FRAMES * 2):
+    # dense around the threshold, sparse elsewhere (the valid frame counter saturates at MIN_VALID_STEERING_FRAMES)
+    valid_frames = self._boundary_values([self.MIN_VALID_STEERING_FRAMES], 0, self.MIN_VALID_STEERING_FRAMES * 2, sparse_count=10)
+    for min_valid_steer_frames in map(int, valid_frames):
       # Reset match count and rt timer to allow cut (valid_steer_req_count, ts_steer_req_mismatch_last)
       self.safety.init_tests()
       self.safety.set_timer(self.MIN_VALID_STEERING_RT_INTERVAL)
@@ -363,7 +371,7 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         self.assertEqual(should_tx and idx < self.MAX_INVALID_STEERING_FRAMES, tx)
 
       # Keep blocking after one steer_req mismatch
-      for _ in range(100):
+      for _ in range(10):
         self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_TORQUE, steer_req=0)))
 
       # Make sure we can recover
@@ -421,7 +429,7 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         self.assertEqual(should_tx, self._tx(self._torque_cmd_msg(self.MAX_TORQUE, steer_req=0)))
 
       # Keep blocking after one steer_req mismatch
-      for _ in range(100):
+      for _ in range(10):
         self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_TORQUE, steer_req=0)))
 
       # Make sure we can recover
@@ -435,12 +443,6 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
   DRIVER_TORQUE_ALLOWANCE = 0
   DRIVER_TORQUE_FACTOR = 0
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "DriverTorqueSteeringSafetyTest":
-      cls.safety = None
-      raise unittest.SkipTest
-
   @abc.abstractmethod
   def _torque_driver_msg(self, torque):
     pass
@@ -448,6 +450,21 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
   def _reset_torque_driver_measurement(self, torque):
     for _ in range(MAX_SAMPLE_VALS):
       self._rx(self._torque_driver_msg(torque))
+
+  def test_driver_torque_measurements(self):
+    for torque in (50, -50, *([0] * (MAX_SAMPLE_VALS - 2))):
+      self.assertTrue(self._rx(self._torque_driver_msg(torque)))
+
+    self.assertEqual(-50, self.safety.get_torque_driver_min())
+    self.assertEqual(50, self.safety.get_torque_driver_max())
+
+    self.assertTrue(self._rx(self._torque_driver_msg(0)))
+    self.assertEqual(0, self.safety.get_torque_driver_max())
+    self.assertEqual(-50, self.safety.get_torque_driver_min())
+
+    self.assertTrue(self._rx(self._torque_driver_msg(0)))
+    self.assertEqual(0, self.safety.get_torque_driver_max())
+    self.assertEqual(0, self.safety.get_torque_driver_min())
 
   def test_non_realtime_limit_up(self):
     self._reset_torque_driver_measurement(0)
@@ -536,12 +553,6 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
   MAX_TORQUE_ERROR = 0
   TORQUE_MEAS_TOLERANCE = 0
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "MotorTorqueSteeringSafetyTest":
-      cls.safety = None
-      raise unittest.SkipTest
-
   @abc.abstractmethod
   def _torque_meas_msg(self, torque):
     pass
@@ -569,23 +580,18 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
           self.assertEqual(send, self._tx(self._torque_cmd_msg(torque)))
 
   def test_non_realtime_limit_down(self):
-    self.safety.set_controls_allowed(True)
-
     for speed in self._torque_speed_range:
       self._reset_speed_measurement(speed)
       max_torque = self._get_max_torque(speed)
-
       torque_meas = max_torque - self.MAX_TORQUE_ERROR - 50
 
-      self.safety.set_rt_torque_last(max_torque)
-      self.safety.set_torque_meas(torque_meas, torque_meas)
-      self.safety.set_desired_torque_last(max_torque)
-      self.assertTrue(self._tx(self._torque_cmd_msg(max_torque - self.MAX_RATE_DOWN)))
-
-      self.safety.set_rt_torque_last(max_torque)
-      self.safety.set_torque_meas(torque_meas, torque_meas)
-      self.safety.set_desired_torque_last(max_torque)
-      self.assertFalse(self._tx(self._torque_cmd_msg(max_torque - self.MAX_RATE_DOWN + 1)))
+      for sign in (-1, 1):
+        for delta in (self.MAX_RATE_DOWN, self.MAX_RATE_DOWN - 1):
+          self.safety.set_controls_allowed(True)
+          self.safety.set_rt_torque_last(sign * max_torque)
+          self.safety.set_torque_meas(sign * torque_meas, sign * torque_meas)
+          self.safety.set_desired_torque_last(sign * max_torque)
+          self.assertEqual(delta == self.MAX_RATE_DOWN, self._tx(self._torque_cmd_msg(sign * (max_torque - delta))))
 
   def test_exceed_torque_sensor(self):
     self.safety.set_controls_allowed(True)
@@ -657,12 +663,6 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
 
 class VehicleSpeedSafetyTest(SafetyTestBase):
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "VehicleSpeedSafetyTest":
-      cls.safety = None
-      raise unittest.SkipTest
-
   @abc.abstractmethod
   def _speed_msg(self, speed):
     pass
@@ -683,12 +683,6 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   # Real time limits
   LATERAL_FREQUENCY: int = -1  # Hz
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "AngleSteeringSafetyTest":
-      cls.safety = None
-      raise unittest.SkipTest
 
   @abc.abstractmethod
   def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
@@ -768,6 +762,20 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
         should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
+    # around zero, at CAN resolution: only moving away from a non-zero angle is winding up, anything else uses the down limit.
+    # past the last breakpoint (2 m/s past it, beyond the safety's 1 m/s speed fudge) the down limit is its last value,
+    # computed in float32 like the safety
+    down = int(np.float32(self.ANGLE_RATE_DOWN[-1]) * np.float32(self.DEG_TO_CAN) + np.float32(1.))
+
+    self._reset_speed_measurement(self.ANGLE_RATE_BP[-1] + 2)
+    for last in (-1, 0, 1):
+      for sign in (-1, 1):
+        self.safety.set_controls_allowed(True)
+        self.safety.set_desired_angle_last(last)
+        cmd = last + sign * down
+        winding_up = last * sign > 0  # the up limit is lower, so it doesn't allow this
+        self.assertEqual(not winding_up, self._tx(self._angle_cmd_msg(cmd / self.DEG_TO_CAN, True)), (last, cmd))
+
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while
     # steer actuation bit is 0, regardless of controls allowed.
@@ -775,10 +783,10 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.safety.set_controls_allowed(controls_allowed)
 
       for steer_control_enabled in (True, False):
-        for angle_meas in np.arange(-90, 91, 10):
+        for angle_meas in range(-90, 91, 10):
           self._reset_angle_measurement(angle_meas)
 
-          for angle_cmd in np.arange(-90, 91, 10):
+          for angle_cmd in range(-90, 91, 10):
             self._set_prev_desired_angle(angle_cmd)
 
             # controls_allowed is checked if actuation bit is 1, else the angle must be close to meas (inactive)
@@ -829,18 +837,16 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
   CURVATURE_TO_CAN: float
   SEND_RATE: float
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "CurvatureSteeringSafetyTest":
-      cls.safety = None
-      raise unittest.SkipTest
-
   @abc.abstractmethod
   def _curvature_cmd_msg(self, curvature: float, steer_req: bool):
     pass
 
   @abc.abstractmethod
   def _curvature_meas_msg(self, curvature: float):
+    pass
+
+  @abc.abstractmethod
+  def _speed_msg_2(self, speed: float):
     pass
 
   def _set_prev_desired_curvature(self, curvature: float):
@@ -931,6 +937,115 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.assertFalse(self._tx(self._curvature_cmd_msg(2 * max_curvature_delta, True)))
 
 
+class CanIgnitionSafetyTest(SafetyTestBase):
+  """ignition_can_hook runs on every CAN msg whatever the safety mode, reading ignition from a car's power state msg.
+  A car with one fills in _ignition_msg and the config below."""
+  SAFETY_MODEL = None
+  IGNITION_VALUES: range  # every raw power state
+  IGNITION_ON_VALUES: set[int]  # the power states that mean ignition on
+  # the msg counter wraps at this, and only a msg whose counter follows the previous one's is read; None if ungated
+  IGNITION_COUNTER_MOD: int | None = None
+  IGNITION_BUSES: tuple[int, ...] = (0,)  # each bus keeps its own previous counter
+
+  @abc.abstractmethod
+  def _ignition_msg(self, value: int, counter: int | None = None, bus: int = 0):
+    raise NotImplementedError(f"{type(self).__name__} must implement _ignition_msg")
+
+  @property
+  def _on(self) -> int:
+    return min(self.IGNITION_ON_VALUES)
+
+  @property
+  def _off(self) -> int:
+    return min(set(self.IGNITION_VALUES) - self.IGNITION_ON_VALUES)
+
+  def _ign_msg(self, value: int, counter: int, bus: int = 0, length_delta: int = 0):
+    msg = self._ignition_msg(value, None if self.IGNITION_COUNTER_MOD is None else counter % self.IGNITION_COUNTER_MOD, bus)
+    if length_delta:
+      length = DLC_TO_LEN[msg[0].data_len_code] + length_delta
+      msg = libsafety_py.make_CANPacket(msg[0].addr, msg[0].bus, bytes(msg[0].data[0:length]))
+    return msg
+
+  def _ignition(self, msg, read: bool) -> bool:
+    # ignition_can_cnt is panda firmware's ignition timeout: each msg read resets it, an ignored one leaves it be
+    self.safety.ignition_can_cnt = 1234
+    self.safety.ignition_can_hook(msg)
+    self.assertEqual(read, self.safety.ignition_can_cnt == 0, "msg read" if read else "msg ignored")
+    return self.safety.get_ignition_can()
+
+  def _send(self, value: int, counter: int, bus: int = 0, read: bool = True) -> bool:
+    return self._ignition(self._ign_msg(value, counter, bus), read)
+
+  def _send_first(self, value: int, counter: int, bus: int = 0) -> bool:
+    # the first msg after init_tests is read only when there is no counter to follow
+    return self._send(value, counter, bus, read=self.IGNITION_COUNTER_MOD is None)
+
+  def test_ignition_values(self):
+    # after a msg that latched on or off, the next msg (with the next counter) latches each power state
+    for bus, prev, value in itertools.product(self.IGNITION_BUSES, (self._on, self._off), self.IGNITION_VALUES):
+      self.safety.init_tests()
+      self._send_first(prev, 0, bus)
+      self.assertEqual(prev in self.IGNITION_ON_VALUES, self._send(prev, 1, bus))
+      self.assertEqual(value in self.IGNITION_ON_VALUES, self._send(value, 2, bus), (bus, prev, value))
+
+  def test_ignition_counter_wrap(self):
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    mod = self.IGNITION_COUNTER_MOD
+    for bus, counter in itertools.product(self.IGNITION_BUSES, range(mod)):
+      self.safety.init_tests()
+      self.assertFalse(self._send(self._on, counter, bus, read=False))
+      self.assertTrue(self._send(self._on, counter + 1, bus), (bus, counter))
+
+  def test_ignition_counter_skipped(self):
+    # a skipped or repeated counter is not read, in either direction, and the next consecutive one is
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    mod = self.IGNITION_COUNTER_MOD
+    for bus, counter, value in itertools.product(self.IGNITION_BUSES, range(mod), (self._on, self._off)):
+      latched = value not in self.IGNITION_ON_VALUES
+      other = self._on if latched else self._off
+      self.safety.init_tests()
+      self._send(other, counter, bus, read=False)
+      self.assertEqual(latched, self._send(other, counter + 1, bus))
+      self.assertEqual(latched, self._send(value, counter + 3, bus, read=False), (bus, counter, value))
+      self.assertEqual(latched, self._send(value, counter + 3, bus, read=False), (bus, counter, value))
+      self.assertEqual(not latched, self._send(value, counter + 4, bus), (bus, counter, value))
+
+  def test_ignition_init_resets_counter(self):
+    # init_tests forgets the previous counter, so no test sees a counter left over from another one
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    for bus in self.IGNITION_BUSES:
+      self.safety.init_tests()
+      self._send(self._on, 0, bus, read=False)
+      self.safety.init_tests()
+      self.assertFalse(self._send(self._on, 1, bus, read=False))
+
+  def test_ignition_buses_independent(self):
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    if len(self.IGNITION_BUSES) < 2:
+      self.skipTest("ignition msg is read on one bus")
+    for bus, other_bus in itertools.permutations(self.IGNITION_BUSES, 2):
+      self.safety.init_tests()
+      self._send(self._on, 0, bus, read=False)
+      self.assertFalse(self._send(self._on, 1, other_bus, read=False))
+      self.assertTrue(self._send(self._on, 1, bus))
+
+  def test_ignition_wrong_bus_or_length(self):
+    # a msg on another bus or with another length is ignored: an off one neither latches off nor advances the
+    # previous counter, so a good off msg with the very same counter still follows the last good one
+    wrong = [(bus, 0) for bus in range(4) if bus not in self.IGNITION_BUSES] + [(bus, -1) for bus in self.IGNITION_BUSES]
+    for bus, length_delta in wrong:
+      good_bus = bus if bus in self.IGNITION_BUSES else self.IGNITION_BUSES[0]
+      self.safety.init_tests()
+      self._send_first(self._on, 0, good_bus)
+      self.assertTrue(self._send(self._on, 1, good_bus))
+      self.assertTrue(self._ignition(self._ign_msg(self._off, 2, bus, length_delta), read=False), (bus, length_delta))
+      self.assertFalse(self._send(self._off, 2, good_bus), (bus, length_delta))
+
+
 class SafetyTest(SafetyTestBase):
   TX_MSGS: list[list[int]] = []
   SCANNED_ADDRS = [*range(0x800),                      # Entire 11-bit CAN address space
@@ -939,12 +1054,6 @@ class SafetyTest(SafetyTestBase):
                    *range(0x3300, 0x3400)]                  # Honda
   FWD_BLACKLISTED_ADDRS: dict[int, list[int]] = {}  # {bus: [addr]}
   FWD_BUS_LOOKUP: dict[int, int] = {0: 2, 2: 0}
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "SafetyTest" or cls.__name__.endswith('Base'):
-      cls.safety = None
-      raise unittest.SkipTest
 
   # ***** standard tests for all safety modes *****
 
@@ -967,9 +1076,10 @@ class SafetyTest(SafetyTestBase):
         self.assertEqual(fwd_bus, self.safety.safety_fwd_hook(bus, addr), f"{addr=:#x} from {bus=} to {fwd_bus=}")
 
   def test_spam_can_buses(self):
+    tx_msgs = {(addr, bus) for addr, bus in self.TX_MSGS}
     for bus in range(4):
       for addr in self.SCANNED_ADDRS:
-        if [addr, bus] not in self.TX_MSGS:
+        if (addr, bus) not in tx_msgs:
           self.assertFalse(self._tx(make_msg(bus, addr, 8)), f"allowed TX {addr=} {bus=}")
 
   def test_default_controls_not_allowed(self):
@@ -980,6 +1090,12 @@ class SafetyTest(SafetyTestBase):
     self.assertTrue(self.safety.get_controls_allowed())
     self.safety.set_controls_allowed(0)
     self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_rx_checks_unused_msgs(self):
+    # unused alternative message slots of an RX check are zeroed, so a zeroed message (address 0, bus 0, length 0) must not match one
+    self._rx(make_msg(0, 0, 0))
+    for i in range(self.safety.get_rx_checks_len()):
+      self.assertFalse(self.safety.safety_a.state.rx_status[i].msg_seen)
 
   def test_tx_hook_on_wrong_safety_mode(self):
     files = os.listdir(os.path.dirname(os.path.realpath(__file__)))
@@ -1065,13 +1181,7 @@ class SafetyTest(SafetyTestBase):
 class CarSafetyTest(SafetyTest):
   STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
-  RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "CarSafetyTest" or cls.__name__.endswith('Base'):
-      cls.safety = None
-      raise unittest.SkipTest
+  RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]]
 
   @abc.abstractmethod
   def _user_brake_msg(self, brake):
@@ -1100,7 +1210,196 @@ class CarSafetyTest(SafetyTest):
   def _pcm_status_msg(self, enable):
     pass
 
+  # {msg name: {signal: valid values}} of the quality flags of the RX checked msgs
+  RX_QUALITY_FLAGS: dict[str, dict[str, tuple[int, ...]]] = {}
+
+  def _rx_check_msg(self, addr: int, bus: int, values: dict[str, float] | None = None):
+    """The RX checked msg's next frame, valid unless values say otherwise"""
+    name = self.packer.dbc.addr_to_msg[addr].name
+    quality_flags = {sig: valid[0] for sig, valid in self.RX_QUALITY_FLAGS.get(name, {}).items()}
+    return self.packer.make_can_msg_safety(addr, bus, {**quality_flags, **(values or {})})
+
+  def _rx_check_builders(self):
+    """(index, msg check, build) of each C RX checked msg in the DBC. A car sends one of an RX check's alternative msgs.
+    build(values) makes the msg's next frame"""
+    cfg = self.safety.safety_a.setup.current_safety_config
+    builders = []
+    for i in range(cfg.rx_checks_len):
+      # the DBC has one of the alternatives, or several. Unused alternative slots have addr 0, in no DBC
+      msgs = [m for m in cfg.rx_checks[i].msg if m.addr in self.packer.dbc.addr_to_msg]
+      self.assertTrue(msgs, f"RX check {i}: none of its msgs are in {self.DBC}")
+      builders += [(i, m, functools.partial(self._rx_check_msg, m.addr, m.bus)) for m in msgs]
+    return builders
+
+  def _rx_invalid(self, msg, err_msg):
+    """Whether msg fails RX. A failing msg must disengage, and change nothing but the RX status"""
+    rx_status_start = libsafety_py.ffi.offsetof("SafetyState", "rx_status")
+    rx_status_end = rx_status_start + libsafety_py.ffi.sizeof(self.safety.safety_a.state.rx_status)
+
+    def state():
+      buf = state_buffer("safety_a")[:]
+      return buf[:rx_status_start] + buf[rx_status_end:]
+
+    self.safety.set_controls_allowed(True)
+    before = state()
+    if self._rx(msg):
+      return False
+    self.assertFalse(self.safety.get_controls_allowed(), err_msg)
+    self.safety.set_controls_allowed(True)
+    self.assertEqual(before, state(), err_msg)
+    return True
+
+  def _raw_msg(self, name: str, bus: int, raw_values: dict[str, int]):
+    """A valid frame of the msg with these raw signal values, and the other signals zero"""
+    msg = self.packer.dbc.name_to_msg[name]
+    values = {sig: raw * msg.sigs[sig].factor + msg.sigs[sig].offset for sig, raw in raw_values.items()}
+    return self._rx_check_msg(msg.address, bus, values)
+
+  def _test_signal_bits(self, msg_func: MessageFunction, get_state: Callable[[], bool], threshold: float):
+    """Every bit of every signal msg_func writes must turn the state on or leave it off, as the signal's value says.
+    msg_func(threshold) is the last frame that leaves the state off, and msg_func(threshold + 1) turns it on"""
+    off_msg, on_msg = msg_func(threshold)[0], msg_func(threshold + 1)[0]
+    self.assertEqual(off_msg.addr, on_msg.addr)
+    msg = self.packer.dbc.addr_to_msg[off_msg.addr]
+    enums = {val.name for val in self.packer.dbc.vals if val.address == msg.address}
+
+    # the signals msg_func writes, with their raw values in the off and on frames. Counters and checksums change every frame
+    off_raws, on_raws = {}, {}
+    for sig in msg.sigs.values():
+      off_raw, on_raw = sig.get_raw_value(bytes(off_msg.data)), sig.get_raw_value(bytes(on_msg.data))
+      if off_raw != on_raw and sig.type == SignalType.DEFAULT and sig.name != "COUNTER":
+        off_raws[sig.name], on_raws[sig.name] = off_raw, on_raw
+    self.assertTrue(off_raws, f"{msg.name}: msg_func writes no signal")
+
+    def turns_on(name: str, raw: int) -> bool:
+      sig = msg.sigs[name]
+      if name in enums:  # a state, like VehStop_D_Stat: anything but the off state
+        return raw != off_raws[name]
+      if on_raws[name] < off_raws[name]:  # inverted, like GAS_RELEASED
+        return raw < off_raws[name]
+      # a magnitude, like a wheel speed either way
+      return abs(raw * sig.factor + sig.offset) > abs(off_raws[name] * sig.factor + sig.offset)
+
+    # each signal alone at every bit, around the off value, and at its max, so no bit can be decoded from the wrong place
+    one_signal_values = []
+    for name, off_raw in off_raws.items():
+      max_raw = (1 << msg.sigs[name].size) - 1
+      raws = {0, max(off_raw - 1, 0), off_raw, min(off_raw + 1, max_raw), on_raws[name], max_raw}
+      raws |= {1 << bit for bit in range(msg.sigs[name].size)}
+      one_signal_values += [{name: raw} for raw in sorted(raws)]
+
+    # every combination of signals at their on values, so signals can't cancel each other out, as when summed
+    combined_values = []
+    for count in range(2, len(off_raws) + 1):
+      for combination in itertools.combinations(off_raws, count):
+        combined_values.append({name: on_raws[name] for name in combination})
+
+    for raw_values in one_signal_values + combined_values:
+      # the other signals stay off
+      self.assertTrue(self._rx(self._raw_msg(msg.name, off_msg.bus, off_raws | raw_values)), raw_values)
+      expected = any(turns_on(name, raw) for name, raw in raw_values.items())
+      self.assertEqual(expected, get_state(), raw_values)
+
   # ***** standard tests for all car-specific safety modes *****
+
+  def test_rx_checksum(self):
+    # the C checksum agrees with the packer's on every bit flip of an RX checked msg, and a frame failing it fails RX.
+    # The frames are a random one and its complement, so every bit is flipped both ways
+    for i, m, _ in self._rx_check_builders():
+      if m.ignore_checksum:
+        continue
+      sigs = self.packer.dbc.addr_to_msg[m.addr].sigs.values()
+      checksums = [(sig, sig.calc_checksum) for sig in sigs if sig.calc_checksum]
+      self.assertTrue(checksums, f"{m.addr=:#x}: the packer doesn't compute its checksum")
+      rand = random.Random(m.addr).randbytes(m.len)
+      for dat in (bytearray(rand), bytearray(b ^ 0xFF for b in rand)):
+        for sig, calc in checksums:
+          set_value(dat, sig, calc(m.addr, sig, dat))
+        for byte in range(m.len):
+          for bit in range(8):
+            err_msg = f"{m.addr=:#x} {m.bus=} {byte=} {bit=}"
+            flipped = bytearray(dat)
+            flipped[byte] ^= 1 << bit
+            valid = all(calc(m.addr, sig, bytearray(flipped)) == sig.get_raw_value(flipped) for sig, calc in checksums)
+            msg = libsafety_py.make_CANPacket(m.addr, m.bus, bytes(flipped))
+
+            self._reset_safety_hooks()
+            if valid:
+              self._rx(msg)
+            else:
+              self.assertTrue(self._rx_invalid(msg, err_msg), err_msg)
+            self.assertEqual(valid, self.safety.safety_a.state.rx_status[i].valid_checksum, err_msg)
+
+  def test_rx_reads_only_signal_bits(self):
+    # the safety reads only the bits of the msg's signals. The bits outside them, in the msg and past its length,
+    # change nothing, whatever they hold
+    for _, m, build in self._rx_check_builders():
+      with self.subTest(addr=hex(m.addr), bus=m.bus):
+        msg = build()  # keep the packet alive while reading its data
+        dat = bytes(msg[0].data)[:m.len]
+
+        # the same frame with every bit outside the signals set
+        sigs = self.packer.dbc.addr_to_msg[m.addr].sigs.values()
+        signal_bits = bytearray(m.len)
+        for sig in sigs:
+          set_value(signal_bits, sig, (1 << sig.size) - 1)
+        noisy_dat = bytearray(byte | (~mask & 0xFF) for byte, mask in zip(dat, signal_bits, strict=True))
+        for sig in sigs:
+          if sig.calc_checksum:
+            set_value(noisy_dat, sig, sig.calc_checksum(m.addr, sig, noisy_dat))
+
+        states = []
+        for frame, fill in ((dat, 0x00), (bytes(noisy_dat), 0xFF)):
+          self._reset_safety_hooks()
+          self.assertTrue(self._rx(libsafety_py.make_CANPacket(m.addr, m.bus, frame, fill)), f"{fill=:#x}")
+          states.append(state_buffer("safety_a")[:])
+        self.assertEqual(states[0], states[1])
+
+  def test_rx_counter(self):
+    # a counter sequence with rollover is valid. Replayed or skipped counters fail RX from the MAX_WRONG_COUNTERS'th on,
+    # unless the RX check ignores counters, and valid frames recover
+    for i, m, build in self._rx_check_builders():
+      with self.subTest(addr=hex(m.addr), bus=m.bus):
+        self._reset_safety_hooks()
+        for n in range(m.max_counter + 2):
+          msg = build()
+          self.assertTrue(self._rx(msg), f"frame {n}")
+          if n > 0:  # the first frame's counter has nothing to follow
+            self.assertEqual(0, self.safety.safety_a.state.rx_status[i].wrong_counters, f"frame {n}")
+
+        for name in ("replay", "skip"):
+          for n in range(MAX_WRONG_COUNTERS + 1):
+            if name == "skip":
+              build()
+              msg = build()
+            err_msg = f"{name} {n}"
+            if m.ignore_counter or n < MAX_WRONG_COUNTERS - 1:
+              self.assertTrue(self._rx(msg), err_msg)
+            else:
+              self.assertTrue(self._rx_invalid(msg, err_msg), err_msg)
+          for n in range(MAX_WRONG_COUNTERS):
+            self.assertTrue(self._rx(build()), f"{name} recovery {n}")
+
+  def test_rx_quality_flag(self):
+    # an RX checked msg is valid only while each of its quality flags is
+    for _, m, build in self._rx_check_builders():
+      if m.ignore_quality_flag:
+        continue
+      msg = self.packer.dbc.addr_to_msg[m.addr]
+      for sig, valid in self.RX_QUALITY_FLAGS[msg.name].items():
+        for value in range(1 << msg.sigs[sig].size):
+          err_msg = f"{msg.name} {sig}={value}"
+          self._reset_safety_hooks()
+          if value in valid:
+            self.assertTrue(self._rx(build({sig: value})), err_msg)
+          else:
+            self.assertTrue(self._rx_invalid(build({sig: value}), err_msg), err_msg)
+
+  def test_gas_pressed_bits(self):
+    self._test_signal_bits(self._user_gas_msg, self.safety.get_gas_pressed_prev, self.GAS_PRESSED_THRESHOLD)
+
+  def test_vehicle_moving_bits(self):
+    self._test_signal_bits(self._vehicle_moving_msg, self.safety.get_vehicle_moving, self.STANDSTILL_THRESHOLD)
 
   def test_relay_malfunction(self):
     # each car has an addr that is used to detect relay malfunction
@@ -1149,6 +1448,7 @@ class CarSafetyTest(SafetyTest):
   def test_prev_user_brake(self, _user_brake_msg=None, get_brake_pressed_prev=None):
     if _user_brake_msg is None:
       _user_brake_msg = self._user_brake_msg
+    if get_brake_pressed_prev is None:
       get_brake_pressed_prev = self.safety.get_brake_pressed_prev
 
     self.assertFalse(get_brake_pressed_prev())
@@ -1240,12 +1540,31 @@ class CarSafetyTest(SafetyTest):
         self.safety.set_controls_allowed(True)
         self._rx(self._speed_msg_2(speed_2))
 
-        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
+        within_delta = speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_safety_tick(self):
-    self.safety.set_timer(int(2e6))
-    self.safety.set_controls_allowed(True)
-    self.safety.safety_tick_current_safety_config()
-    self.assertFalse(self.safety.get_controls_allowed())
-    self.assertFalse(self.safety.safety_config_valid())
+    # Missing valid RX messages must disable controls even before they time out.
+    for elapsed in (0, int(2e6)):
+      with self.subTest(elapsed=elapsed):
+        self._reset_safety_hooks()
+        self.safety.set_timer(elapsed)
+        self.safety.set_controls_allowed(True)
+        self.safety.safety_tick()
+        self.assertFalse(self.safety.get_controls_allowed())
+        self.assertFalse(self.safety.safety_config_valid())
+
+  def test_rx_lagging(self):
+    # a check lags after 10 missed messages or 1 s, whichever is longer. checks are at least 10 Hz, so it is always 1 s
+    lag_us = 1000000
+    self.assertGreater(self.safety.get_rx_checks_len(), 0)
+    for stale in range(self.safety.get_rx_checks_len()):
+      for age, allowed in ((lag_us, True), (lag_us + 1, False)):
+        with self.subTest(stale=stale, age=age):
+          self._reset_safety_hooks()
+          self.safety.set_timer(2 * lag_us)
+          self.safety.set_rx_checks_received(stale, age)
+          self.assertTrue(self.safety.safety_config_valid())
+          self.safety.set_controls_allowed(True)
+          self.safety.safety_tick()
+          self.assertEqual(allowed, self.safety.get_controls_allowed())

@@ -96,7 +96,6 @@ class RadarInterface(RadarInterfaceBase):
     self.points: list[list[float]] = []
     self.clusters: list[Cluster] = []
 
-    self.updated_messages = set()
     self.radar = DBC[CP.carFingerprint].get(Bus.radar)
     self.scan_index_invalid_cnt = 0
     self.radar_unavailable_cnt = 0
@@ -113,34 +112,23 @@ class RadarInterface(RadarInterfaceBase):
     else:
       raise ValueError(f"Unsupported radar: {self.radar}")
 
-  def update(self, can_strings):
-    if self.rcp is None:
-      return super().update(None)
-
-    vls = self.rcp.update(can_strings)
-    self.updated_messages.update(vls)
-
-    if self.trigger_msg not in self.updated_messages:
-      return None
-    self.updated_messages.clear()
-
+  def _update(self, rcp, updated_messages):
     ret = structs.RadarData()
-    if not self.rcp.can_valid:
+    if not rcp.can_valid:
       ret.errors.canError = True
 
     if self.radar == RADAR.DELPHI_ESR:
-      self._update_delphi_esr()
+      self._update_delphi_esr(rcp, updated_messages)
     elif self.radar == RADAR.DELPHI_MRR:
-      _update = self._update_delphi_mrr(ret)
-      if not _update:
+      if not self._update_delphi_mrr(rcp, ret):
         return None
 
     ret.points = list(self.pts.values())
     return ret
 
-  def _update_delphi_esr(self):
-    for ii in sorted(self.updated_messages):
-      cpt = self.rcp.vl[ii]
+  def _update_delphi_esr(self, rcp: CANParser, updated_messages: set[int]):
+    for ii in sorted(updated_messages):
+      cpt = rcp.vl[ii]
 
       if cpt['X_Rel'] > 0.00001:
         self.valid_cnt[ii] = 0    # reset counter
@@ -164,8 +152,8 @@ class RadarInterface(RadarInterfaceBase):
         if ii in self.pts:
           del self.pts[ii]
 
-  def _update_delphi_mrr(self, ret: structs.RadarData):
-    headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
+  def _update_delphi_mrr(self, rcp: CANParser, ret: structs.RadarData):
+    headerScanIndex = int(rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
     # In reverse, the radar continually sends the last messages. Mark this as invalid
     if (self.prev_headerScanIndex + 1) % 4 != headerScanIndex:
@@ -185,7 +173,7 @@ class RadarInterface(RadarInterfaceBase):
     if headerScanIndex not in (2, 3):
       return False
 
-    if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
+    if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
       self.scan_index_invalid_cnt += 1
     else:
       self.scan_index_invalid_cnt = 0
@@ -195,7 +183,7 @@ class RadarInterface(RadarInterfaceBase):
       ret.errors.wrongConfig = True
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
-      msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
+      msg = rcp.vl[f"MRR_Detection_{ii:03d}"]
 
       # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
       # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)

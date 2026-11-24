@@ -17,7 +17,7 @@ jobs:
     - name: Wait for car diff
       id: wait
       continue-on-error: true
-      uses: lewagon/wait-on-check-action@v1.3.4
+      uses: lewagon/wait-on-check-action@v1.9.1
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         check-name: car diff
@@ -26,7 +26,7 @@ jobs:
         wait-interval: 20
     - name: Download car diff
       if: steps.wait.outcome == 'success'
-      uses: dawidd6/action-download-artifact@v6
+      uses: dawidd6/action-download-artifact@v24
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workflow: tests.yml
@@ -37,9 +37,9 @@ jobs:
         allow_forks: true
     - name: Comment car diff on PR
       if: steps.wait.outcome == 'success'
-      uses: thollander/actions-comment-pull-request@v2
+      uses: thollander/actions-comment-pull-request@v3.0.1
       with:
-        filePath: diff.txt
-        comment_tag: car_diff
-        pr_number: ${{ github.event.number }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        file-path: diff.txt
+        comment-tag: car_diff
+        pr-number: ${{ github.event.number }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -67,5 +67,5 @@ class TestMisraMutation(unittest.TestCase):
           print(r.stdout) # helpful for debugging failures
           failed = r.returncode != 0
           assert failed == should_fail
-          if should_fail:
+          if rule is not None:
             assert rule in r.stdout, "MISRA test failed but not for the correct violation"

@@ -126,7 +126,7 @@ BO_ 728 NEW_MSG_2D8: 7 XXX
 BO_ 757 STEERING: 7 XXX
  SG_ COUNTER : 3|4@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 7|4@0+ (1,0) [0|15] "" XXX
- SG_ DRIVER_TORQUE : 15|8@0- (1,0) [0|255] "" XXX
+ SG_ DRIVER_TORQUE : 15|8@0- (0.1,0) [-12.8|12.7] "Nm" XXX
  SG_ ANGLE : 31|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
  SG_ RATE : 47|12@0- (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_1 : 48|1@0+ (1,0) [0|1] "" XXX
@@ -160,7 +160,7 @@ BO_ 770 NEW_MSG_302: 7 XXX
 
 BO_ 773 STEERING_ALT: 7 XXX
  SG_ ANGLE : 7|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
- SG_ RATE : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ RATE : 23|8@0+ (4,0) [0|1020] "deg/s" XXX
  SG_ RATE_SIGN : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ 0_COUNTER : 35|4@0+ (1,0) [0|255] "" XXX
  SG_ 0_CHECKSUM : 39|4@0+ (1,0) [0|15] "" XXX
@@ -406,7 +406,7 @@ BO_ 1161 Dat_V2_BV: 8 BVA___Automatikgetriebe
  SG_ P218_Com_stDrvIdx : 48|8@1+ (1,0) [0|255] "" Vector__XXX
 
 BO_ 1173 IS_DAT_DIRA: 4 PSCM
- SG_ EPS_TORQUE : 7|8@0- (0.25,0) [-32|31.5] "Nm" Tester
+ SG_ DRIVER_TORQUE : 7|8@0- (0.25,0) [-32|31.5] "Nm" Tester
  SG_ ETAT_DA_2004 : 9|2@0+ (1,0) [0|3] "" Tester
  SG_ ETAT_DA_DYN : 13|2@0+ (1,0) [0|3] "" Tester
  SG_ ETAT_DA_2010 : 15|2@0+ (1,0) [0|3] "" Tester
@@ -1026,7 +1026,7 @@ VAL_ 1106 FRONT_WASH_STATUS 0 "Off" 1 "Wash";
 VAL_ 1106 FORCE_ACTIVATION_HAB_CMD 0 "Deactivation" 1 "Activation";
 VAL_ 1106 COCKPIT_GO_ACC_REQUEST 0 "VALUE_1" 1 "VALUE_2";
 VAL_ 1106 ACC_PROGRAM_MODE 0 "Comfort" 1 "Sport" 2 "Eco" 3 "Reserved";
-VAL_ 1173 EPS_TORQUE 127 "Invalid";
+VAL_ 1173 DRIVER_TORQUE 127 "Invalid";
 VAL_ 1173 ETAT_DA_2004 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand";
 VAL_ 1173 ETAT_DA_DYN 3 "Invalid" 2 "Adjustable Mode" 1 "Dynamic Mode" 0 "Normal Mode";
 VAL_ 1173 ETAT_DA_2010 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand";

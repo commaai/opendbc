@@ -1,6 +1,7 @@
 import math
 import numbers
 from collections import defaultdict, deque
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 from opendbc.car.carlog import carlog
@@ -9,21 +10,6 @@ from opendbc.can.dbc import DBC, Signal
 
 MAX_BAD_COUNTER = 5
 CAN_INVALID_CNT = 5
-
-
-def get_raw_value(dat: bytes | bytearray, sig: Signal) -> int:
-  ret = 0
-  i = sig.msb // 8
-  bits = sig.size
-  while 0 <= i < len(dat) and bits > 0:
-    lsb = sig.lsb if (sig.lsb // 8) == i else i * 8
-    msb = sig.msb if (sig.msb // 8) == i else (i + 1) * 8 - 1
-    size = msb - lsb + 1
-    d = (dat[i] >> (lsb - (i * 8))) & ((1 << size) - 1)
-    ret |= d << (bits - size)
-    bits -= size
-    i = i - 1 if sig.is_little_endian else i + 1
-  return ret
 
 
 @dataclass
@@ -54,12 +40,14 @@ class MessageState:
     tmp_vals: list[float] = [0.0] * len(self.signals)
     checksum_failed = False
     counter_failed = False
+    counter = 0
+    counter_sig = None
 
     if self.first_seen_nanos == 0:
       self.first_seen_nanos = nanos
 
     for i, sig in enumerate(self.signals):
-      tmp = get_raw_value(dat, sig)
+      tmp = sig.get_raw_value(dat)
       if sig.is_signed:
         tmp -= ((tmp >> (sig.size - 1)) & 0x1) * (1 << sig.size)
 
@@ -69,11 +57,14 @@ class MessageState:
           checksum_failed = True
           self.rate_limited_log(nanos, f"checksum failed: received {hex(tmp)}, calculated {hex(expected_checksum)}")
 
-      if not self.ignore_counter and sig.type == 1:  # COUNTER
-        if not self.update_counter(tmp, sig.size):
-          counter_failed = True
+      if sig.type == 1:  # COUNTER, which may be split across signals
+        counter |= tmp << sig.counter_shift
+        counter_sig = sig
 
       tmp_vals[i] = tmp * sig.factor + sig.offset
+
+    if not self.ignore_counter and counter_sig is not None:
+      counter_failed = not self.update_counter(counter, counter_sig.max_counter)
 
     # must have good counter and checksum to update data
     if checksum_failed or counter_failed:
@@ -92,12 +83,12 @@ class MessageState:
     if self.frequency < 1e-5 and len(self.timestamps) >= 3:
       dt = (self.timestamps[-1] - self.timestamps[0]) * 1e-9
       if (dt > 1.0 or (self.timestamps.maxlen is not None and len(self.timestamps) >= self.timestamps.maxlen)) and dt != 0:
-        self.frequency = min(len(self.timestamps) / dt, 100.0)
+        self.frequency = min((len(self.timestamps) - 1) / dt, 100.0)
         self.timeout_threshold = (1_000_000_000 / self.frequency) * 10
     return True
 
-  def update_counter(self, cur_count: int, cnt_size: int) -> bool:
-    if ((self.counter + 1) & ((1 << cnt_size) - 1)) != cur_count:
+  def update_counter(self, cur_count: int, max_counter: int) -> bool:
+    if (self.counter + 1) % (max_counter + 1) != cur_count:
       self.counter_fail = min(self.counter_fail + 1, MAX_BAD_COUNTER)
     elif self.counter_fail > 0:
       self.counter_fail -= 1
@@ -126,7 +117,7 @@ class VLDict(dict):
 
 
 class CANParser:
-  def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int):
+  def __init__(self, dbc_name: str, messages: Sequence[tuple[str | int, float]], bus: int):
     self.dbc_name: str = dbc_name
     self.bus: int = bus
     self.dbc = DBC(dbc_name)
@@ -152,8 +143,9 @@ class CANParser:
     self.can_invalid_cnt: int = CAN_INVALID_CNT
     self.last_nonempty_nanos: int = 0
     self._last_update_nanos: int = 0
+    self._last_invalid_log_nanos: int | None = None
 
-  def _add_message(self, name_or_addr: str | int, freq: int | None = None) -> None:
+  def _add_message(self, name_or_addr: str | int, freq: float | None = None) -> None:
     if isinstance(name_or_addr, numbers.Number):
       msg = self.dbc.addr_to_msg.get(int(name_or_addr))
     else:
@@ -177,6 +169,8 @@ class CANParser:
       size=msg.size,
       signals=list(msg.sigs.values()),
       ignore_alive=freq is not None and math.isnan(freq),
+      ignore_checksum=self.dbc.checksum_state.ignore_checksum if self.dbc.checksum_state else False,
+      ignore_counter=self.dbc.checksum_state.ignore_counter if self.dbc.checksum_state else False,
     )
     if freq is not None and freq > 0:
       state.frequency = freq
@@ -201,13 +195,20 @@ class CANParser:
     valid = True
     counters_valid = True
     bus_timeout = self.bus_timeout
+    invalid_messages = set()
     for state in self.message_states.values():
       if state.counter_fail >= MAX_BAD_COUNTER:
         counters_valid = False
         state.rate_limited_log(self._last_update_nanos, f"counter invalid, {state.counter_fail=} {MAX_BAD_COUNTER=}")
       if not state.valid(self._last_update_nanos, bus_timeout):
         valid = False
-        state.rate_limited_log(self._last_update_nanos, "not valid (timeout or missing)")
+        invalid_messages.add(state.address)
+
+    if invalid_messages and (self._last_invalid_log_nanos is None or
+                             self._last_update_nanos - self._last_invalid_log_nanos >= 10_000_000_000):
+      messages = ', '.join(f"{hex(addr)} {self.message_states[addr].name}" for addr in sorted(invalid_messages))
+      carlog.warning(f"CANParser: bus {self.bus} not valid (timeout or missing): {messages}")
+      self._last_invalid_log_nanos = self._last_update_nanos
 
     # TODO: probably only want to increment this once per update() call
     self.can_invalid_cnt = 0 if valid else min(self.can_invalid_cnt + 1, CAN_INVALID_CNT)

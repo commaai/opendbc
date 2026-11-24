@@ -24,44 +24,23 @@ def get_radar_can_parser(CP):
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.updated_messages = set()
+    self.rcp = None if CP.radarUnavailable else get_radar_can_parser(CP)
     self.trigger_msg = RADAR_START_ADDR + RADAR_MSG_COUNT - 1
 
-    self.radar_off_can = CP.radarUnavailable
-    self.rcp = get_radar_can_parser(CP)
-
-  def update(self, can_strings):
-    if self.radar_off_can or self.rcp is None:
-      return super().update(None)
-
-    vls = self.rcp.update(can_strings)
-    self.updated_messages.update(vls)
-
-    if self.trigger_msg not in self.updated_messages:
-      return None
-
-    rr = self._update(self.updated_messages)
-    self.updated_messages.clear()
-
-    return rr
-
-  def _update(self, updated_messages):
+  def _update(self, rcp, updated_messages):
     ret = structs.RadarData()
-    if self.rcp is None:
-      return ret
-
-    if not self.rcp.can_valid:
+    if not rcp.can_valid:
       ret.errors.canError = True
 
-    radar_status = self.rcp.vl['RadarStatus']
+    radar_status = rcp.vl['RadarStatus']
     if radar_status['shortTermUnavailable']:
       ret.errors.radarUnavailableTemporary = True
     if radar_status['sensorBlocked'] or radar_status['vehDynamicsError']:
       ret.errors.radarFault = True
 
     for i in range(RADAR_MSG_COUNT // 2):
-      msg_a = self.rcp.vl[f'RadarPoint{i}_A']
-      msg_b = self.rcp.vl[f'RadarPoint{i}_B']
+      msg_a = rcp.vl[f'RadarPoint{i}_A']
+      msg_b = rcp.vl[f'RadarPoint{i}_B']
 
       # Make sure msg A and B are together
       if msg_a['Index'] != msg_b['Index2']:

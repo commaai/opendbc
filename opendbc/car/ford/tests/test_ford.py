@@ -3,7 +3,7 @@ import unittest
 
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
-from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes
+from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes, match_fw_to_car_fuzzy
 from opendbc.car.ford.fingerprints import FW_VERSIONS
 from opendbc.testing import fuzzy_test, parameterized
 
@@ -91,7 +91,7 @@ class TestFordFW(unittest.TestCase):
                                         subAddress=0 if sub_addr is None else sub_addr))
 
         CP = CarParams(carFw=car_fw)
-        matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, FW_VERSIONS)
+        matches = match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, FW_VERSIONS)
         assert matches == {platform}
 
   def test_match_fw_fuzzy(self):
@@ -123,15 +123,15 @@ class TestFordFW(unittest.TestCase):
       (0x764, None): {b"LB5T-14D049-XX\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"},
       (0x706, None): {b"LB5T-14F397-XX\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"},
     }
-    candidates = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw})
+    candidates = match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw})
     assert candidates == {expected_fingerprint}
 
     # model year hint in between the range should match
     live_fw[(0x706, None)] = {b"MB5T-14F397-XX\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"}
-    candidates = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw,})
+    candidates = match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw,})
     assert candidates == {expected_fingerprint}
 
     # unseen model year hint should not match
     live_fw[(0x760, None)] = {b"M1MC-2D053-XX\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"}
-    candidates = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw})
+    candidates = match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw})
     assert len(candidates) == 0, "Should not match new model year hint"

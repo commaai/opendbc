@@ -26,10 +26,12 @@ TOLERANCE = 1e-4
 DIFF_BUCKET = "car_diff"
 IGNORE_FIELDS = ["cumLagMs", "canErrorCounter"]
 PADDING = 5
+# GitHub's comment limit is 65536, the rest is room for the tag the comment action adds
+MAX_COMMENT = 65000
 
 Diff = tuple[str, int, tuple[Any, Any], int]
 Ref = tuple[int, structs.CarState]
-Result = tuple[str, str, list[Diff], list[Ref] | None, list[structs.CarState] | None, str | None]
+Result = tuple[str, str, list[Diff], list[Ref], list[structs.CarState], str | None]
 
 
 def dict_diff(d1: dict[str, Any], d2: dict[str, Any], path: str = "", ignore: list[str] | None = None, tolerance: float = 0) -> list[tuple]:
@@ -90,10 +92,10 @@ def process_segment(args: tuple) -> Result:
     if update:
       data = {"cp": CP.to_dict(), "frames": list(zip(timestamps, states, strict=True))}
       ref_file.write_bytes(zstd.compress(pickle.dumps(data), 10))
-      return (platform, seg, [], None, None, None)
+      return (platform, seg, [], [], [], None)
 
     if not ref_file.exists():
-      return (platform, seg, [], None, None, "no ref")
+      return (platform, seg, [], [], [], "no ref")
 
     ref_data = pickle.loads(decompress_stream(ref_file.read_bytes()))
     cp: dict[str, Any] = ref_data["cp"]
@@ -106,7 +108,7 @@ def process_segment(args: tuple) -> Result:
         diffs.append((diff[1], i, diff[2], ts))
     return (platform, seg, diffs, ref, states, None)
   except Exception:
-    return (platform, seg, [], None, None, traceback.format_exc())
+    return (platform, seg, [], [], [], traceback.format_exc())
 
 
 def get_changed_platforms(cwd: Path, database: dict[str, Any], interfaces: dict[str, Any]) -> list[str]:
@@ -247,6 +249,34 @@ def format_diff(diffs: list[Diff], ref: list[Ref], states: list[structs.CarState
   return format_numeric_diffs(diffs)
 
 
+def format_report(title: str, description: str, changes: list[tuple[str, list[str]]], n_passed: int, errors: list[str],
+                  max_len: int | None = MAX_COMMENT) -> str:
+  # changes: each changed item's name and its lines, max_len: as many changes as fit, None for all
+  icon = "⚠️" if changes or errors else "✅"
+  lines = [
+    f"## {title}",
+    description,
+    "Please review any changes carefully to ensure they are expected.\n",
+    f"{icon}  {len(changes)} changed, {n_passed} passed, {len(errors)} errors",
+  ]
+  if errors:
+    lines.append("<details><summary><b>Show errors</b></summary>\n\n```")
+    lines += [f"\n{e}" for e in dict.fromkeys(errors)]
+    lines.append("```\n</details>")
+  if changes:
+    lines.append("<details><summary><b>Show changes</b></summary>\n\n```")
+    size = sum(len(line) + 1 for line in lines)
+    for i, (name, change) in enumerate(changes):
+      size += len(name) + 2 + sum(len(line) + 1 for line in change)
+      # leave room for the closing lines
+      if max_len is not None and size > max_len - 100:
+        lines.append(f"\n(... {len(changes) - i} more)")
+        break
+      lines += [f"\n{name}", *change]
+    lines.append("```\n</details>")
+  return "\n".join(lines)
+
+
 def main(platform: str | None = None, segments_per_platform: int = 10, update_refs: bool = False, all_platforms: bool = False) -> int:
   from comma_car_segments import get_comma_car_segments_database
   cwd = Path(__file__).resolve().parents[3]
@@ -264,19 +294,16 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
   else:
     platforms = get_changed_platforms(cwd, database, interfaces)
 
-  print("## Car behavior report")
-  print("Replays driving segments through this PR and compares the behavior to master.")
-  print("Please review any changes carefully to ensure they are expected.\n")
-
+  title = "Car behavior report"
   if not platforms:
-    print("✅ No changes detected")
+    print(format_report(title, "Replays driving segments through this PR and compares the behavior to master.", [], 0, []))
     return 0
 
   segments = {p: database.get(p, [])[:segments_per_platform] for p in platforms}
   n_segments = sum(len(s) for s in segments.values())
-  print(f"{'Generating' if update_refs else 'Testing'} {n_segments} segments for: {', '.join(platforms)}")
 
   if update_refs:
+    print(f"Generating {n_segments} segments for: {', '.join(platforms)}")
     results = run_replay(platforms, segments, ref_path, update=True)
     errors = [e for _, _, _, _, _, e in results if e]
     assert len(errors) == 0, f"Segment failures: {errors}"
@@ -290,28 +317,19 @@ def main(platform: str | None = None, segments_per_platform: int = 10, update_re
   errors = [(platform, seg, err) for platform, seg, diffs, ref, states, err in results if err]
   n_passed = len(results) - len(with_diffs) - len(errors)
 
-  icon = "⚠️" if with_diffs else "✅"
-  print(f"\n{icon}  {len(with_diffs)} changed, {n_passed} passed, {len(errors)} errors")
+  changes = []
+  for plat, seg, diffs, ref, states in with_diffs:
+    lines = []
+    by_field = defaultdict(list)
+    for d in diffs:
+      by_field[d[0]].append(d)
+    for field, fd in sorted(by_field.items()):
+      lines.append(f"\n  {field} ({len(fd)} diffs)")
+      lines += format_diff(fd, ref, states, field)
+    changes.append((f"{plat} - {seg}", lines))
 
-  if errors:
-    print("<details><summary><b>Show errors</b></summary>\n\n```")
-    for err in dict.fromkeys(err for _, _, err in errors):
-      print(f"\n{err}")
-    print("```\n</details>")
-
-  if with_diffs:
-    print("<details><summary><b>Show changes</b></summary>\n\n```")
-    for plat, seg, diffs, ref, states in with_diffs:
-      print(f"\n{plat} - {seg}")
-      by_field = defaultdict(list)
-      for d in diffs:
-        by_field[d[0]].append(d)
-      for field, fd in sorted(by_field.items()):
-        print(f"\n  {field} ({len(fd)} diffs)")
-        for line in format_diff(fd, ref, states, field):
-          print(line)
-    print("```\n</details>")
-
+  description = f"Replays {n_segments} driving segments of {', '.join(platforms)} through this PR and compares the behavior to master."
+  print(format_report(title, description, changes, n_passed, [err for _, _, err in errors]))
   return 1 if errors else 0
 
 

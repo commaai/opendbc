@@ -4,9 +4,7 @@ import unittest
 
 from opendbc.car.structs import CarParams
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
-from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
 
 MAX_ACCEL = 2.0
 MIN_ACCEL = -3.5
@@ -31,8 +29,6 @@ MSG_LDW_02     = 0x397
 
 
 class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteeringSafetyTest):
-  STANDSTILL_THRESHOLD = 0
-
   MAX_CURVATURE = 29105
   MAX_CURVATURE_TEST = 0.195
   CURVATURE_TO_CAN = 149253.7313
@@ -95,13 +91,13 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertFalse(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power)))      # steady power
     self.assertTrue(self._tx(self._curvature_cmd_msg(0, steer_req=True, power=max_power - 1)))   # decreasing power
 
-  def _speed_msg(self, speed_mps: float):
-    spd_kph = speed_mps * 3.6
+  def _speed_msg(self, speed: float):
+    spd_kph = speed * 3.6
     values = {f"{s}_Radgeschw": spd_kph for s in ("VL", "VR", "HL", "HR")}
     return self.packer.make_can_msg_safety("ESC_51", 0, values)
 
-  def _speed_msg_2(self, speed_mps: float):
-    values = {"ESP_v_Signal": speed_mps * 3.6}
+  def _speed_msg_2(self, speed: float):
+    values = {"ESP_v_Signal": speed * 3.6}
     return self.packer.make_can_msg_safety("ESP_21", 0, values)
 
   def _motor_14_msg(self, brake):
@@ -114,9 +110,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   def _user_gas_msg(self, gas):
     values = {"Accel_Pedal_Pressure": 1 if gas else 0, "TSK_Status": 3}
     return self.packer.make_can_msg_safety("Motor_51", 0, values)
-
-  def _vehicle_moving_msg(self, speed_mps: float):
-    return self._speed_msg(speed_mps)
 
   def _curvature_meas_msg(self, curvature):
     values = {"Curvature": abs(curvature), "Curvature_VZ": curvature > 0}
@@ -178,44 +171,15 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertEqual(0, self.safety.get_curvature_meas_max())
     self.assertEqual(0, self.safety.get_curvature_meas_min())
 
-  def test_brake_signal(self):
-    self._rx(self._user_brake_msg(False))
-    self.assertFalse(self.safety.get_brake_pressed_prev())
-    self._rx(self._user_brake_msg(True))
-    self.assertTrue(self.safety.get_brake_pressed_prev())
-
   def test_torque_driver_measurements(self):
     for t in (0, 100, -100, 250, -250):
       self._rx(self._torque_driver_msg(t))
 
-  def test_rx_hook(self):
-    # checksum and counter checks
-    for name in ("LH_EPS_03", "Motor_14", "GRA_ACC_01", "QFK_01", "ESP_21", "Motor_51", "ESC_51"):
-      with self.subTest(msg=name):
-        # an expected counter sequence is always accepted, and clears the wrong counter count
-        next_counter = common.MAX_WRONG_COUNTERS + 1
-        for counter in range(next_counter):
-          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": counter})))
-
-        # mess with the checksum to make it fail, it's the first byte of every MEB message
-        msg = self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})
-        msg[0].data[0] ^= 0xFF
-        self.assertFalse(self._rx(msg))
-
-        # a stuck counter fails as well, its checksum is still correct
-        for i in range(common.MAX_WRONG_COUNTERS):
-          should_rx = i < common.MAX_WRONG_COUNTERS - 1
-          self.assertEqual(should_rx, self._rx(self.packer.make_can_msg_safety(name, 0, {"COUNTER": next_counter})))
-
   def test_main_switch_off_disables_controls(self):
-    self.safety.set_controls_allowed(True)
-    self._rx(self._tsk_status_msg(False, main_switch=False))
-    self.assertFalse(self.safety.get_controls_allowed())
-
-  def test_cancel_button_rising_edge(self):
-    self.safety.set_controls_allowed(True)
-    self._rx(self._button_msg(cancel=1, bus=0))
-    self.assertFalse(self.safety.get_controls_allowed())
+    for tsk_status in range(8):
+      self.safety.set_controls_allowed(True)
+      self._rx(self.packer.make_can_msg_safety("Motor_51", 0, {"TSK_Status": tsk_status}))
+      self.assertEqual(tsk_status in (2, 3, 4, 5), self.safety.get_controls_allowed())
 
   def test_rx_hook_speed_mismatch(self):
     for speed in np.arange(0, 40, 0.5):
@@ -226,7 +190,7 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
         self.safety.set_controls_allowed(True)
         self._tx(self._curvature_cmd_msg(0, steer_req=True))
 
-        within_delta = abs(speed - speed_2) <= common.MAX_SPEED_DELTA
+        within_delta = common.speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_curvature_violation(self):
@@ -261,6 +225,9 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
 
 
 class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
+  DBC = "vw_meb_generated"
+  SAFETY_MODEL = CarParams.SafetyModel.volkswagenMeb
+
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_ACC_19, 0], [MSG_ACC_18, 0],
              [MSG_TA_01, 0], [MSG_KLR_01, 0], [MSG_KLR_01, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_KLR_01],
@@ -270,12 +237,6 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
 
   ACCEL_OVERRIDE = 0
   INACTIVE_ACCEL = 3.01
-
-  def setUp(self):
-    self.packer = CANPackerSafety("vw_meb_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, 0)
-    self.safety.init_tests()
 
   # stock cruise controls are entirely bypassed under openpilot longitudinal control
   def test_disable_control_allowed_from_cruise(self):
@@ -360,42 +321,19 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
 
 
 class TestVolkswagenMebGen2Safety(TestVolkswagenMebSafety):
-  def setUp(self):
-    self.packer = CANPackerSafety("vw_meb_2024_generated")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMeb, VolkswagenSafetyFlags.MEB_ALT_CRC)
-    self.safety.init_tests()
+  DBC = "vw_meb_2024_generated"
+
+  SAFETY_PARAM = VolkswagenSafetyFlags.MEB_ALT_CRC
 
 
-# ZAS_Kl_15=1
-class TestVolkswagenMebIgnition(unittest.TestCase):
-  TX_MSGS: list = []
+class TestVolkswagenMebIgnition(common.CanIgnitionSafetyTest):
+  DBC = "vw_meb_generated"
+  IGNITION_VALUES = range(2)
+  IGNITION_ON_VALUES = {1}  # ZAS_Kl_15
+  IGNITION_COUNTER_MOD = 16
 
-  def setUp(self):
-    self.safety = libsafety_py.libsafety
-    self.safety.init_tests()
-    self.packer = CANPackerSafety("vw_meb_generated")
-
-  def _msg(self, counter, ign):
-    return self.packer.make_can_msg_safety("Klemmen_Status_01", 0,
-                                           {"Klemmen_Status_01_BZ": counter,
-                                            "ZAS_Kl_15": ign})
-
-  def test_ignition_on(self):
-    for i in range(16):
-      self.safety.init_tests()
-      self.safety.ignition_can_hook(self._msg(i, 1))
-      self.assertFalse(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._msg((i + 1) % 16, 1))
-      self.assertTrue(self.safety.get_ignition_can())
-
-  def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0, 1))
-    self.safety.ignition_can_hook(self._msg(1, 1))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(2, 0))
-    self.safety.ignition_can_hook(self._msg(3, 0))
-    self.assertFalse(self.safety.get_ignition_can())
+  def _ignition_msg(self, value, counter=None, bus=0):
+    return self.packer.make_can_msg_safety("Klemmen_Status_01", bus, {"Klemmen_Status_01_BZ": counter, "ZAS_Kl_15": value})
 
 
 if __name__ == "__main__":

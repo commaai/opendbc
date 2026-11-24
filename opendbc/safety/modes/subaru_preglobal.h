@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_SUBARU_PREGLOBAL_H
+#define SAFETY_MODES_SUBARU_PREGLOBAL_H
 
 #include "opendbc/safety/declarations.h"
 
@@ -15,38 +16,31 @@
 #define MSG_SUBARU_PG_Steering_Torque       0x371U
 
 #define SUBARU_PG_MAIN_BUS 0U
-#define SUBARU_PG_CAM_BUS  2U
-
-static bool subaru_pg_reversed_driver_torque = false;
 
 static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
-  if (msg->bus == SUBARU_PG_MAIN_BUS) {
-    if (msg->addr == MSG_SUBARU_PG_Steering_Torque) {
-      int torque_driver_new;
-      torque_driver_new = (msg->data[3] >> 5) + (msg->data[4] << 3);
-      torque_driver_new = to_signed(torque_driver_new, 11);
-      torque_driver_new = subaru_pg_reversed_driver_torque ? -torque_driver_new : torque_driver_new;
-      update_sample(&torque_driver, torque_driver_new);
-    }
+  if (msg_matches(msg, MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS)) {
+    int torque_driver_new = to_signed(GET_BYTES_LE(msg, 3, 2) >> 5, 11);
+    torque_driver_new = safety_setup.subaru_pg_reversed_driver_torque ? -torque_driver_new : torque_driver_new;
+    update_sample(&safety.torque_driver, torque_driver_new);
+  }
 
-    // enter controls on rising edge of ACC, exit controls on ACC off
-    if (msg->addr == MSG_SUBARU_PG_CruiseControl) {
-      bool cruise_engaged = (msg->data[6] >> 1) & 1U;
-      pcm_cruise_check(cruise_engaged);
-    }
+  // enter controls on rising edge of ACC, exit controls on ACC off
+  if (msg_matches(msg, MSG_SUBARU_PG_CruiseControl, SUBARU_PG_MAIN_BUS)) {
+    bool cruise_engaged = GET_BIT(msg, 49U);
+    pcm_cruise_check(cruise_engaged);
+  }
 
-    // update vehicle moving with any non-zero wheel speed
-    if (msg->addr == MSG_SUBARU_PG_Wheel_Speeds) {
-      vehicle_moving = ((GET_BYTES(msg, 0, 4) >> 12) != 0U) || (GET_BYTES(msg, 4, 4) != 0U);
-    }
+  // update vehicle moving with any non-zero wheel speed
+  if (msg_matches(msg, MSG_SUBARU_PG_Wheel_Speeds, SUBARU_PG_MAIN_BUS)) {
+    safety.vehicle_moving = (GET_BYTES_LE(msg, 0, 4) | GET_BYTES_LE(msg, 4, 4)) != 0U;
+  }
 
-    if (msg->addr == MSG_SUBARU_PG_Brake_Pedal) {
-      brake_pressed = ((GET_BYTES(msg, 0, 4) >> 16) & 0xFFU) > 0U;
-    }
+  if (msg_matches(msg, MSG_SUBARU_PG_Brake_Pedal, SUBARU_PG_MAIN_BUS)) {
+    safety.brake_pressed = ((GET_BYTES_LE(msg, 0, 4) >> 16) & 0xFFU) > 0U;
+  }
 
-    if (msg->addr == MSG_SUBARU_PG_Throttle) {
-      gas_pressed = msg->data[0] != 0U;
-    }
+  if (msg_matches(msg, MSG_SUBARU_PG_Throttle, SUBARU_PG_MAIN_BUS)) {
+    safety.gas_pressed = msg->data[0] != 0U;
   }
 }
 
@@ -65,27 +59,27 @@ static bool subaru_preglobal_tx_hook(const CANPacket_t *msg) {
 
   // steer cmd checks
   if (msg->addr == MSG_SUBARU_PG_ES_LKAS) {
-    int desired_torque = ((GET_BYTES(msg, 0, 4) >> 8) & 0x1FFFU);
-    desired_torque = -1 * to_signed(desired_torque, 13);
+    int desired_torque = -1 * to_signed((GET_BYTES_LE(msg, 0, 4) >> 8) & 0x1FFFU, 13);
 
-    bool steer_req = (msg->data[3] >> 0) & 1U;
+    bool steer_req = GET_BIT(msg, 24U);
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, SUBARU_PG_STEERING_LIMITS)) {
       tx = false;
     }
   }
+
   return tx;
 }
 
 static safety_config subaru_preglobal_init(uint16_t param) {
   static const CanMsg SUBARU_PG_TX_MSGS[] = {
     {MSG_SUBARU_PG_ES_Distance, SUBARU_PG_MAIN_BUS, 8, .check_relay = true},
-    {MSG_SUBARU_PG_ES_LKAS,     SUBARU_PG_MAIN_BUS, 8, .check_relay = true}
+    {MSG_SUBARU_PG_ES_LKAS,     SUBARU_PG_MAIN_BUS, 8, .check_relay = true},
   };
 
   // TODO: do checksum and counter checks after adding the signals to the outback dbc file
-  static RxCheck subaru_preglobal_rx_checks[] = {
-    {.msg = {{MSG_SUBARU_PG_Throttle,        SUBARU_PG_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
+  static const RxCheck subaru_preglobal_rx_checks[] = {
+    {.msg = {{MSG_SUBARU_PG_Throttle,       SUBARU_PG_MAIN_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_SUBARU_PG_CruiseControl,   SUBARU_PG_MAIN_BUS, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
     {.msg = {{MSG_SUBARU_PG_Wheel_Speeds,    SUBARU_PG_MAIN_BUS, 8, 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -94,7 +88,7 @@ static safety_config subaru_preglobal_init(uint16_t param) {
 
   const uint16_t SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE = 4;
 
-  subaru_pg_reversed_driver_torque = GET_FLAG(param, SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE);
+  safety_setup.subaru_pg_reversed_driver_torque = GET_FLAG(param, SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE);
   return BUILD_SAFETY_CFG(subaru_preglobal_rx_checks, SUBARU_PG_TX_MSGS);
 }
 
@@ -103,3 +97,5 @@ const safety_hooks subaru_preglobal_hooks = {
   .rx = subaru_preglobal_rx_hook,
   .tx = subaru_preglobal_tx_hook,
 };
+
+#endif  // SAFETY_MODES_SUBARU_PREGLOBAL_H

@@ -50,6 +50,8 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = cp.vl["EPAS_INFO"]["EPAS_Failure"] == 1
     ret.steerFaultPermanent = cp.vl["EPAS_INFO"]["EPAS_Failure"] in (2, 3)
     ret.espDisabled = cp.vl["Cluster_Info1_FD1"]["DrvSlipCtlMde_D_Rq"] != 0  # 0 is default mode
+    # the PSCM stops lane assist (LaActAvail_D_Actl -> 0) when ABS is active
+    ret.espActive = bool(cp.vl["DesiredTorqBrk"]["AbsActv_B_Actl"])
 
     if self.CP.flags & FordFlags.CANFD:
       # this signal is always 0 on non-CAN FD cars
@@ -96,7 +98,7 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = cp.vl["RCMStatusMessage2_FD1"]["FirstRowBuckleDriver"] == 2
 
     # blindspot sensors
-    if self.CP.enableBsm:
+    if self.CP.flags & FordFlags.HAS_BSM:
       cp_bsm = cp_cam if self.CP.flags & FordFlags.CANFD else cp
       ret.leftBlindspot = cp_bsm.vl["Side_Detect_L_Stat"]["SodDetctLeft_D_Stat"] != 0
       ret.rightBlindspot = cp_bsm.vl["Side_Detect_R_Stat"]["SodDetctRight_D_Stat"] != 0

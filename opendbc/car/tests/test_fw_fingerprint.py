@@ -100,7 +100,7 @@ class TestFwFingerprint(unittest.TestCase):
 
   def test_fw_version_lists(self):
     for car_model, ecus in FW_VERSIONS.items():
-      with self.subTest(car_model=car_model.value):
+      with self.subTest(car_model=car_model):
         for ecu, ecu_fw in ecus.items():
           with self.subTest(ecu):
             duplicates = {fw for fw in ecu_fw if ecu_fw.count(fw) > 1}
@@ -112,7 +112,7 @@ class TestFwFingerprint(unittest.TestCase):
       for car_model, ecus in VERSIONS[brand].items():
         for ecu, fw_versions in ecus.items():
           for fw in fw_versions:
-            with self.subTest(brand=brand, car_model=car_model.value, ecu=ecu, fw=fw):
+            with self.subTest(brand=brand, car_model=car_model, ecu=ecu, fw=fw):
               assert re.fullmatch(config.fw_version_regex, fw) is not None, fw
 
   def test_all_addrs_map_to_one_ecu(self):
@@ -130,13 +130,13 @@ class TestFwFingerprint(unittest.TestCase):
     for brand, config in FW_QUERY_CONFIGS.items():
       for car_model, ecus in VERSIONS[brand].items():
         bad_ecus = set(ecus).intersection(config.extra_ecus)
-        with self.subTest(car_model=car_model.value):
+        with self.subTest(car_model=car_model):
           assert not len(bad_ecus), f'{car_model}: Fingerprints contain ECUs added for data collection: {bad_ecus}'
 
   def test_blacklisted_ecus(self):
     blacklisted_addrs = (0x7c4, 0x7d0)  # includes A/C ecu and an unknown ecu
     for car_model, ecus in FW_VERSIONS.items():
-      with self.subTest(car_model=car_model.value):
+      with self.subTest(car_model=car_model):
         CP = interfaces[car_model].get_non_essential_params(car_model)
         if CP.brand == 'subaru':
           for ecu in ecus.keys():
@@ -271,10 +271,11 @@ class TestFwFingerprintTiming(unittest.TestCase):
         print(f'get_vin {name} case, query time={self.total_time / self.N} seconds')
 
   def test_fw_query_timing(self):
-    total_ref_time = 8.2
+    total_ref_time = 8.3
     brand_ref_times = {
       'gm': 1.0,
       'body': 0.1,
+      'byd': 0.0,
       'chrysler': 0.3,
       'ford': 1.5,
       'honda': 0.45,
@@ -287,6 +288,7 @@ class TestFwFingerprintTiming(unittest.TestCase):
       'volkswagen': 0.65,
       'rivian': 0.3,
       'psa': 0.1,
+      'mg': 0.1,
     }
 
     total_times = 0.0

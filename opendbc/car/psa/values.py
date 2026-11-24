@@ -17,7 +17,7 @@ class CarControllerParams:
     ([0., 5., 25.], [2.5, 1.5, .2]),
     ([0., 5., 25.], [5., 2., .3]),
   )
-  STEER_DRIVER_ALLOWANCE = 5  # Driver intervention threshold, 0.5 Nm
+  STEER_DRIVER_ALLOWANCE = 0.5  # Driver intervention threshold, Nm
 
 
 @dataclass
@@ -36,7 +36,7 @@ class PSAPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   PSA_PEUGEOT_208 = PSAPlatformConfig(
     [PSACarDocs("Peugeot 208 2019-25")],
-    CarSpecs(mass=1530, wheelbase=2.54, steerRatio=17.6),
+    CarSpecs(wheelbase=2.54, steerRatio=17.6),
   )
 
 

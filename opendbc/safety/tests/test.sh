@@ -6,17 +6,21 @@ cd $DIR
 
 source ../../../setup.sh
 
-# reset coverage data
-rm -f ./libsafety/*.gcda
+# TODO: get UBSan and coverage without running the tests twice.
+# Run UBSan separately so its checks do not count as coverage branches.
+SAFETY_COVERAGE=0 python -m unittest discover -s .
+
+# reset coverage data, including metadata from previous builds
+rm -f ./libsafety/*.gcda ./libsafety/*.gcno
 
 # run safety tests and generate coverage data
-python -m unittest discover -s .
+SAFETY_COVERAGE=1 python -m unittest discover -s .
 
 # NOTE: we accept that these tools will have slight differences,
 # and in return, we get to use the stock toolchain instead of
 # installing LLVM on all users' machines
 if [ "$(uname)" = "Darwin" ]; then
-  GCOV_EXEC="llvm-cov gcov"
+  GCOV_EXEC="xcrun llvm-cov gcov"
 else
   GCOV_EXEC="gcov"
 fi
@@ -29,10 +33,10 @@ if [ "$1" == "--report" ]; then
 fi
 
 # test coverage
-GCOV="gcovr -r $DIR/../ --gcov-executable \"$GCOV_EXEC\" -d --fail-under-line=100 -e ^libsafety"
+GCOV="gcovr -r $DIR/../ --gcov-executable \"$GCOV_EXEC\" -d --fail-under-line=100 --fail-under-branch=100 --txt-metric branch -e ^libsafety"
 if ! GCOV_OUTPUT="$(eval $GCOV)"; then
   echo -e "FAILED:\n$GCOV_OUTPUT"
   exit 1
 else
-  echo "SUCCESS: All checked files have 100% coverage!"
+  echo "SUCCESS: All checked files have 100% line and branch coverage!"
 fi
