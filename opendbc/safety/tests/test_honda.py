@@ -487,11 +487,6 @@ class TestHondaBoschRadarlessAltSCMSafety(HondaPcmEnableBase, TestHondaBoschRada
   DBC = "honda_odyssey_rc5_can_generated"
   SAFETY_PARAM = HondaSafetyFlags.RADARLESS | HondaSafetyFlags.NIDEC_ALT
 
-  def setUp(self):
-    super().setUp()
-    # the car also sends SCM_FEEDBACK (0x326), which isn't in its DBC
-    self.scm_feedback_packer = common.CANPackerSafety("honda_bosch_radarless_generated")
-
   def _acc_state_msg(self, main_on):
     values = {"MAIN_ON": main_on}
     return self.packer.make_can_msg_safety("SCM_BUTTONS", self.PT_BUS, values)
@@ -502,8 +497,9 @@ class TestHondaBoschRadarlessAltSCMSafety(HondaPcmEnableBase, TestHondaBoschRada
     return self.packer.make_can_msg_safety("SCM_BUTTONS", bus, values)
 
   def _scm_feedback_msg(self, main_on):
+    # the car also sends the Bosch SCM_FEEDBACK (0x326)
     values = {"MAIN_ON": main_on}
-    return self.scm_feedback_packer.make_can_msg_safety("SCM_FEEDBACK", self.PT_BUS, values)
+    return self.packer.make_can_msg_safety("SCM_FEEDBACK_2", self.PT_BUS, values)
 
   def test_scm_feedback_main_on_ignored(self):
     # until SCM_BUTTONS is seen, MAIN_ON on SCM_FEEDBACK is used
