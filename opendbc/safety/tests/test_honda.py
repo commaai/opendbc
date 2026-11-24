@@ -497,8 +497,8 @@ class TestHondaBoschRadarlessAltSCMSafety(HondaPcmEnableBase, TestHondaBoschRada
     return self.packer.make_can_msg_safety("SCM_BUTTONS", bus, values)
 
   def _scm_feedback_msg(self, main_on):
-    # the car also sends the Bosch SCM_FEEDBACK (0x326)
-    values = {"MAIN_ON": main_on}
+    # the car also sends 0x326, whose bit 28 the safety reads as MAIN_ON until it sees SCM_BUTTONS
+    values = {"UNKNOWN_BIT_28": main_on}
     return self.packer.make_can_msg_safety("SCM_FEEDBACK_2", self.PT_BUS, values)
 
   def test_scm_feedback_main_on_ignored(self):

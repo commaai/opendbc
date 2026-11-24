@@ -10,7 +10,7 @@ CM_ "IMPORT _bosch_radarless_common.dbc";
 
 
 BO_ 806 SCM_FEEDBACK_2: 8 SCM
- SG_ MAIN_ON : 28|1@0+ (1,0) [0|1] "" EON
+ SG_ UNKNOWN_BIT_28 : 28|1@0+ (1,0) [0|1] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
 
@@ -19,4 +19,5 @@ BO_ 882 CRUISE_PARAMS: 8 PCM
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|15] "" EON
 
-CM_ BO_ 806 "SCM_FEEDBACK of Bosch (0x326), also sent alongside SCM_FEEDBACK (0x294). The safety RX checks it, and reads MAIN_ON from it only until SCM_BUTTONS (0x1A6) is seen";
+CM_ BO_ 806 "Unknown on this car, defined only because the safety RX checks it (0x326 is SCM_FEEDBACK on Bosch)";
+CM_ SG_ 806 UNKNOWN_BIT_28 "Not verified on this car. Declared because the safety reads it as MAIN_ON until SCM_BUTTONS (0x1A6) is seen";
