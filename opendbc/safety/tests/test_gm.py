@@ -55,6 +55,10 @@ class GmLongitudinalBase(common.CarSafetyTest, common.LongitudinalGasBrakeSafety
   def test_cruise_engaged_prev(self):
     pass
 
+  def _engage(self):
+    self._rx(self._button_msg(Buttons.DECEL_SET))
+    self._rx(self._button_msg(Buttons.UNPRESS))
+
   def test_set_resume_buttons(self):
     """
       SET and RESUME enter controls allowed on their falling and rising edges, respectively.

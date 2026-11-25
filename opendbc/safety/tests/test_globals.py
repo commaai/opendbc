@@ -31,6 +31,19 @@ class TestGlobals(unittest.TestCase):
         writable = {n.removeprefix("_") for n in names if not n.startswith("ltmp")}
         self.assertEqual(writable, {"safety_a", "safety_b", "current_copy", "safety_ts", "safety_redundancy_fault"})
 
+  # every engagement has to reset the heartbeat mismatch count, so nothing writes controls_allowed directly
+  def test_controls_allowed_only_written_by_helpers(self):
+    helpers = re.compile(r"^static void (?:enter|exit)_controls\(void\) \{\n.*?^\}\n", re.MULTILINE | re.DOTALL)
+    write = re.compile(r"\bcontrols_allowed\s*(?:[-+*/%&|^]|<<|>>)?=(?!=)|\bcontrols_allowed\s*(?:\+\+|--)|(?:\+\+|--|[(,=]\s*&)\s*safety\.controls_allowed\b")
+    srcs = [f for f in (ROOT / "opendbc/safety").rglob("*.[ch]") if "tests" not in f.parts]
+    self.assertIn(ROOT / "opendbc/safety/safety.h", srcs)
+    for f in srcs:
+      src = f.read_text()
+      if f.name == "safety.h":
+        src, n = helpers.subn("", src)
+        self.assertEqual(n, 2)
+      self.assertIsNone(write.search(src), f"direct controls_allowed write in {f.relative_to(ROOT)}")
+
 
 if __name__ == "__main__":
   unittest.main()

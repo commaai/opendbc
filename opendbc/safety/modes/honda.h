@@ -68,7 +68,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   if ((msg->addr == 0x326U) || (msg->addr == 0x1A6U)) {
     safety.acc_main_on = GET_BIT(msg, ((msg->addr == 0x326U) ? 28U : 47U));
     if (!safety.acc_main_on) {
-      safety.controls_allowed = false;
+      exit_controls();
     }
   }
 
@@ -77,13 +77,13 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     const bool cruise_engaged = GET_BIT(msg, 38U);
     // engage on rising edge
     if (cruise_engaged && !safety.cruise_engaged_prev) {
-      safety.controls_allowed = true;
+      enter_controls();
     }
 
     // Since some Nidec cars can brake down to 0 after the PCM disengages,
     // we don't disengage when the PCM does.
     if (!cruise_engaged && (safety_setup.honda_hw != HONDA_NIDEC)) {
-      safety.controls_allowed = false;
+      exit_controls();
     }
     safety.cruise_engaged_prev = cruise_engaged;
   }
@@ -97,12 +97,12 @@ static void honda_rx_hook(const CANPacket_t *msg) {
     bool set = (button != HONDA_BTN_SET) && (safety.cruise_button_prev == HONDA_BTN_SET);
     bool res = (button != HONDA_BTN_RESUME) && (safety.cruise_button_prev == HONDA_BTN_RESUME);
     if (safety.acc_main_on && !pcm_cruise && (set || res)) {
-      safety.controls_allowed = true;
+      enter_controls();
     }
 
     // exit controls once main or cancel are pressed
     if ((button == HONDA_BTN_MAIN) || (button == HONDA_BTN_CANCEL)) {
-      safety.controls_allowed = false;
+      exit_controls();
     }
     safety.cruise_button_prev = button;
   }

@@ -105,7 +105,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
       // Signal: Motor_5.MO5_GRA_Hauptsch
       safety.acc_main_on = GET_BIT(msg, 50U);
       if (!safety.acc_main_on) {
-        safety.controls_allowed = false;
+        exit_controls();
       }
     }
 
@@ -128,7 +128,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
   // Always exit controls on rising edge of Cancel, override Set/Resume if present simultaneously
   // Signal: GRA_Neu.GRA_Abbrechen
   if (msg_matches(msg, MSG_GRA_NEU, 0U) && GET_BIT(msg, 9U)) {
-    safety.controls_allowed = false;
+    exit_controls();
   }
 
   // Signal: Motor_3.MO3_Pedalwert

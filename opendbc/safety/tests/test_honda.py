@@ -42,6 +42,11 @@ class HondaButtonEnableBase(common.CarSafetyTest):
   def test_cruise_engaged_prev(self):
     pass
 
+  def _engage(self):
+    self._rx(self._acc_state_msg(True))
+    self._rx(self._button_msg(Btn.SET, main_on=True))
+    self._rx(self._button_msg(Btn.NONE, main_on=True))
+
   def test_buttons_with_main_off(self):
     for btn in (Btn.SET, Btn.RESUME, Btn.CANCEL):
       self.safety.set_controls_allowed(1)

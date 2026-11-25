@@ -100,14 +100,16 @@ static void volkswagen_tsk_status_check(int acc_status, bool stock_acc) {
 
   // Always exit controls on main switch off
   if (!safety.acc_main_on) {
-    safety.controls_allowed = false;
+    exit_controls();
   }
 }
 
 // Enter controls on falling edge of Set or Resume with main switch on
 static void volkswagen_set_resume_check(bool set_button, bool resume_button) {
   if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {
-    safety.controls_allowed = safety.acc_main_on;
+    if (safety.acc_main_on) {
+      enter_controls();
+    }
   }
   safety.volkswagen_set_button_prev = set_button;
   safety.volkswagen_resume_button_prev = resume_button;

@@ -50,7 +50,7 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *msg) {
     // Always exit controls on rising edge of Cancel
     // Signal: LS_01.LS_Abbrechen
     if (GET_BIT(msg, 13U)) {
-      safety.controls_allowed = false;
+      exit_controls();
     }
   }
 
