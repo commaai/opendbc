@@ -42,6 +42,7 @@
 #define SAFETY_PSA 31U
 #define SAFETY_BYD 35U
 #define SAFETY_MG 38U
+#define SAFETY_LEAPMOTOR 39U
 #endif
 
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
@@ -275,6 +276,9 @@ typedef struct {
   struct sample_t meas;          // last 6 steer curvatures
 } CurvatureSteeringState;
 
+// Leapmotor: how many of the camera's recent acceleration requests count (see modes/leapmotor.h)
+#define LEAPMOTOR_CAMERA_ACCEL_HISTORY 8U
+
 typedef struct {
   // This can be set by the safety hooks
   bool controls_allowed;
@@ -328,6 +332,9 @@ typedef struct {
 
   uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 
+  int leapmotor_camera_accel[LEAPMOTOR_CAMERA_ACCEL_HISTORY];  // the camera's recent ADAS_LKA.ACC_ACCEL_REQ, raw
+  uint8_t leapmotor_camera_accel_idx;
+
   bool tesla_stock_aeb;
   // Only rising edges while controls are not allowed are considered for these systems:
   // TODO: Only LKAS (non-emergency) is currently supported since we've only seen it
@@ -373,6 +380,8 @@ typedef struct {
   bool hyundai_legacy;
   bool hyundai_canfd_alt_buttons;
   bool hyundai_canfd_lka_steer_msg_alt;
+
+  bool leapmotor_longitudinal;
 
   bool nissan_alt_eps;
 
@@ -420,5 +429,6 @@ extern const safety_hooks volkswagen_pq_hooks;
 extern const safety_hooks psa_hooks;
 extern const safety_hooks byd_hooks;
 extern const safety_hooks mg_hooks;
+extern const safety_hooks leapmotor_hooks;
 
 #endif  // SAFETY_DECLARATIONS_H
