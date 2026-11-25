@@ -325,6 +325,7 @@ typedef struct {
   uint32_t honda_brake;
   bool honda_brake_switch_prev;
   bool honda_fwd_brake;
+  bool honda_bosch_scm_alt;  // 0x1A6 seen: main on comes from SCM_BUTTONS, ignore 0x326 (Odyssey RC5)
 
   uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 

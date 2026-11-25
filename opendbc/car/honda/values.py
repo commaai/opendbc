@@ -49,7 +49,7 @@ class CarControllerParams:
     elif CP.carFingerprint in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CIVIC_2022, CAR.HONDA_ACCORD,
                                CAR.HONDA_CRV_HYBRID, CAR.HONDA_FIT, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.HONDA_HRV_3G,
                                CAR.HONDA_ODYSSEY, CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE, CAR.HONDA_INSIGHT, CAR.HONDA_NBOX_2G,
-                               CAR.HONDA_E, CAR.HONDA_E_ADVANCE, CAR.HONDA_PRELUDE_6G):
+                               CAR.HONDA_E, CAR.HONDA_E_ADVANCE, CAR.HONDA_PRELUDE_6G, CAR.HONDA_ODYSSEY_RC5):
       # TODO: determine if there is a dead zone at the top end (except HONDA_FREED, HONDA_HRV, HONDA_HRV_3G)
       self.STEER_MAX = 4096
     elif CP.carFingerprint == CAR.HONDA_ODYSSEY_TWN:
@@ -218,6 +218,14 @@ class CAR(Platforms):
     HONDA_CIVIC_BOSCH.specs,
     {Bus.pt: 'honda_bosch_radarless_generated'},
     flags=HondaFlags.BOSCH_RADARLESS
+  )
+  HONDA_ODYSSEY_RC5 = HondaBoschPlatformConfig(
+    [
+      HondaCarDocs("Honda Odyssey RC5 JPN 2023-25", "All"),
+    ],
+    CarSpecs(wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
+    {Bus.pt: 'honda_odyssey_rc5_can_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
   HONDA_CRV_5G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V 2017-22", min_steer_speed=15. * CV.MPH_TO_MS)],

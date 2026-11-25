@@ -65,8 +65,18 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 
   // check ACC main state
   // 0x326 for all Bosch and some Nidec, 0x1A6 for some Nidec
-  if ((msg->addr == 0x326U) || (msg->addr == 0x1A6U)) {
-    safety.acc_main_on = GET_BIT(msg, ((msg->addr == 0x326U) ? 28U : 47U));
+  // Odyssey RC5 japanese type use 0x1a6 for scm_buttons and main_on signal
+  // But 0x326 also exist. So we need to ignore it.
+  if (msg->addr == 0x1A6U) {
+    safety.honda_bosch_scm_alt = true;
+    safety.acc_main_on = GET_BIT(msg, 47U);
+    if (!safety.acc_main_on) {
+      safety.controls_allowed = false;
+    }
+  }
+
+  if ((msg->addr == 0x326U) && !safety.honda_bosch_scm_alt) {
+    safety.acc_main_on = GET_BIT(msg, 28U);
     if (!safety.acc_main_on) {
       safety.controls_allowed = false;
     }
@@ -248,7 +258,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   // FORCE CANCEL: safety check only relevant when spamming the cancel button in Bosch HW
   // ensuring that only the cancel button press is sent (VAL 2) when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if (msg_matches(msg, 0x296U, bus_buttons) && !safety.controls_allowed) {
+  if ((msg_matches(msg, 0x296U, bus_buttons) || msg_matches(msg, 0x1A6U, bus_buttons)) && !safety.controls_allowed) {
     if (((msg->data[0] >> 5) & 0x7U) != 2U) {
       tx = false;
     }
@@ -342,6 +352,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   static const CanMsg HONDA_RADARLESS_TX_MSGS[] = {
     {0xE4, 0, 5, .check_relay = true},
     {0x296, 2, 4, .check_relay = false},
+    {0x1A6, 2, 8, .check_relay = false},  // SCM_BUTTONS on Odyssey RC5 (alt SCM)
     {0x33D, 0, 8, .check_relay = true},
   };
 
