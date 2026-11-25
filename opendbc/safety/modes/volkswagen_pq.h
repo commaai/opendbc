@@ -72,13 +72,7 @@ static safety_config volkswagen_pq_init(uint16_t param) {
     {.msg = {{MSG_GRA_NEU, 0, 4, 30U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  volkswagen_common_init();
-
-#ifdef ALLOW_DEBUG
   safety_setup.volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
-#else
-  SAFETY_UNUSED(param);
-#endif
   return safety_setup.volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_LONG_TX_MSGS) : \
                                    BUILD_SAFETY_CFG(volkswagen_pq_rx_checks, VOLKSWAGEN_PQ_STOCK_TX_MSGS);
 }
@@ -203,7 +197,7 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-const safety_hooks volkswagen_pq_hooks = {
+static const safety_hooks volkswagen_pq_hooks = {
   .init = volkswagen_pq_init,
   .rx = volkswagen_pq_rx_hook,
   .tx = volkswagen_pq_tx_hook,

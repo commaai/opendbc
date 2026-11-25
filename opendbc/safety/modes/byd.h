@@ -108,7 +108,7 @@ static safety_config byd_init(uint16_t param) {
   return BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);
 }
 
-const safety_hooks byd_hooks = {
+static const safety_hooks byd_hooks = {
   .init = byd_init,
   .rx = byd_rx_hook,
   .tx = byd_tx_hook,

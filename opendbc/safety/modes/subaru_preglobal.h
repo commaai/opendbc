@@ -92,7 +92,7 @@ static safety_config subaru_preglobal_init(uint16_t param) {
   return BUILD_SAFETY_CFG(subaru_preglobal_rx_checks, SUBARU_PG_TX_MSGS);
 }
 
-const safety_hooks subaru_preglobal_hooks = {
+static const safety_hooks subaru_preglobal_hooks = {
   .init = subaru_preglobal_init,
   .rx = subaru_preglobal_rx_hook,
   .tx = subaru_preglobal_tx_hook,

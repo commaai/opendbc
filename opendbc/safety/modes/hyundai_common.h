@@ -33,8 +33,6 @@ static void hyundai_common_init(uint16_t param) {
 #ifdef ALLOW_DEBUG
   const uint16_t HYUNDAI_PARAM_LONGITUDINAL = 4;
   safety_setup.hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
-#else
-  safety_setup.hyundai_longitudinal = false;
 #endif
 }
 
@@ -60,6 +58,7 @@ static void hyundai_common_cruise_buttons_check(const uint8_t cruise_button, con
     safety.hyundai_last_button_interaction = safety_min_uint8(safety.hyundai_last_button_interaction + 1U, HYUNDAI_PREV_BUTTON_SAMPLES);
   }
 
+#ifdef ALLOW_DEBUG
   if (safety_setup.hyundai_longitudinal) {
     // enter controls on falling edge of resume or set
     bool set = (cruise_button != HYUNDAI_BTN_SET) && (safety.cruise_button_prev == HYUNDAI_BTN_SET);
@@ -75,6 +74,7 @@ static void hyundai_common_cruise_buttons_check(const uint8_t cruise_button, con
 
     safety.cruise_button_prev = cruise_button;
   }
+#endif
 }
 
 static uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {

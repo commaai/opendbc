@@ -144,10 +144,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
 
-  def _torque_driver_msg(self, torque):
-    values = {"EPS_Lenkmoment": abs(torque), "EPS_VZ_Lenkmoment": torque < 0}
-    return self.packer.make_can_msg_safety("LH_EPS_03", 0, values)
-
   def _button_msg(self, cancel=0, resume=0, _set=0, bus=2):
     values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume}
     return self.packer.make_can_msg_safety("GRA_ACC_01", bus, values)
@@ -170,10 +166,6 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self._rx(self._curvature_meas_msg(0))
     self.assertEqual(0, self.safety.get_curvature_meas_max())
     self.assertEqual(0, self.safety.get_curvature_meas_min())
-
-  def test_torque_driver_measurements(self):
-    for t in (0, 100, -100, 250, -250):
-      self._rx(self._torque_driver_msg(t))
 
   def test_main_switch_off_disables_controls(self):
     for tsk_status in range(8):

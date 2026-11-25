@@ -91,7 +91,6 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {MSG_TA_01, 0, 8, .check_relay = true},
   };
 
-  volkswagen_common_init();
   const uint16_t FLAG_VOLKSWAGEN_MEB_ALT_CRC = 2;
   safety_setup.volkswagen_meb_alt_crc = GET_FLAG(param, FLAG_VOLKSWAGEN_MEB_ALT_CRC);
 
@@ -138,10 +137,6 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_QFK_01, 0U)) {
     int current_curvature = sign_magnitude(GET_BYTES_LE(msg, 5, 2) & 0x7FFFU, !GET_BIT(msg, 55U));
     update_sample(&safety.curvature_state.meas, current_curvature);
-  }
-
-  if (msg_matches(msg, MSG_LH_EPS_03, 0U)) {
-    update_sample(&safety.torque_driver, volkswagen_mlb_mqb_driver_input_torque(msg));
   }
 
   if (msg_matches(msg, MSG_Motor_51, 0U)) {

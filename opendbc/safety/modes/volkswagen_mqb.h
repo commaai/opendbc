@@ -15,6 +15,7 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
     {MSG_LH_EPS_03, 2, 8, .check_relay = true},
   };
 
+#ifdef ALLOW_DEBUG
   static const CanMsg VOLKSWAGEN_MQB_LONG_TX_MSGS[] = {
     {MSG_HCA_01, 0, 8, .check_relay = true},
     {MSG_LDW_02, 0, 8, .check_relay = true},
@@ -23,6 +24,7 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
     {MSG_ACC_06, 0, 8, .check_relay = true},
     {MSG_ACC_07, 0, 8, .check_relay = true},
   };
+#endif
 
   static const RxCheck volkswagen_mqb_rx_checks[] = {
     {.msg = {{MSG_ESP_19, 0, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},
@@ -34,16 +36,16 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
     {.msg = {{MSG_GRA_ACC_01, 0, 8, 33U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},
   };
 
-  volkswagen_common_init();
-
+  safety_config ret = BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_STOCK_TX_MSGS);
 #ifdef ALLOW_DEBUG
   safety_setup.volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
+  if (safety_setup.volkswagen_longitudinal) {
+    ret = BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_LONG_TX_MSGS);
+  }
 #else
   SAFETY_UNUSED(param);
 #endif
-
-  return safety_setup.volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_LONG_TX_MSGS) : \
-                                   BUILD_SAFETY_CFG(volkswagen_mqb_rx_checks, VOLKSWAGEN_MQB_STOCK_TX_MSGS);
+  return ret;
 }
 
 static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
@@ -74,9 +76,11 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
     // Signal: GRA_ACC_01.GRA_Tip_Setzen
     // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
+#ifdef ALLOW_DEBUG
     if (safety_setup.volkswagen_longitudinal) {
       volkswagen_set_resume_check(GET_BIT(msg, 16U), GET_BIT(msg, 19U));
     }
+#endif
     // Always exit controls on rising edge of Cancel
     // Signal: GRA_ACC_01.GRA_Abbrechen
     if (GET_BIT(msg, 13U)) {
@@ -114,6 +118,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
     .type = TorqueDriverLimited,
   };
 
+#ifdef ALLOW_DEBUG
   // longitudinal limits
   // acceleration in m/s2 * 1000 to avoid floating point math
   const LongitudinalLimits VOLKSWAGEN_MQB_LONG_LIMITS = {
@@ -121,6 +126,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
     .min_accel = -3500,
     .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
   };
+#endif
 
   bool tx = true;
 
@@ -134,11 +140,12 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+#ifdef ALLOW_DEBUG
   // Safety check for both ACC_06 and ACC_07 acceleration requests
   // To avoid floating point math, scale upward and compare to pre-scaled safety m/s2 boundaries
   if ((msg->addr == MSG_ACC_06) || (msg->addr == MSG_ACC_07)) {
     bool violation = false;
-    int desired_accel = 0;
+    int desired_accel;
 
     if (msg->addr == MSG_ACC_06) {
       // Signal: ACC_06.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
@@ -158,6 +165,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
       tx = false;
     }
   }
+#endif
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
   // This avoids unintended engagements while still allowing resume spam

@@ -51,7 +51,7 @@ static unsigned int hyundai_canfd_get_lka_addr(void) {
 }
 
 static uint8_t hyundai_canfd_get_counter(const CANPacket_t *msg) {
-  uint8_t ret = 0;
+  uint8_t ret;
   if (GET_LEN(msg) == 8U) {
     ret = msg->data[1] >> 4;
   } else {
@@ -78,8 +78,8 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   // cruise buttons
   const unsigned int button_addr = safety_setup.hyundai_canfd_alt_buttons ? 0x1aaU : 0x1cfU;
   if (msg_matches(msg, button_addr, pt_bus)) {
-    bool main_button = false;
-    uint8_t cruise_button = 0U;
+    bool main_button;
+    uint8_t cruise_button;
     if (msg_matches(msg, 0x1cfU, pt_bus)) {
       cruise_button = msg->data[2] & 0x7U;
       main_button = GET_BIT(msg, 19U);
@@ -117,7 +117,11 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   }
 
   // cruise state
+#ifdef ALLOW_DEBUG
   if (!safety_setup.hyundai_longitudinal && msg_matches(msg, 0x1a0U, scc_bus)) {
+#else
+  if (msg_matches(msg, 0x1a0U, scc_bus)) {
+#endif
     // 1=enabled, 2=driver override
     uint8_t cruise_status = (msg->data[8] >> 4) & 0x7U;
     bool cruise_engaged = (cruise_status == 1U) || (cruise_status == 2U);
@@ -146,7 +150,11 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
 
   // steering
+#ifdef ALLOW_DEBUG
   const unsigned int steer_addr = (safety_setup.hyundai_canfd_lka_steer_msg && !safety_setup.hyundai_longitudinal) ? hyundai_canfd_get_lka_addr() : 0x12aU;
+#else
+  const unsigned int steer_addr = safety_setup.hyundai_canfd_lka_steer_msg ? hyundai_canfd_get_lka_addr() : 0x12aU;
+#endif
   if (msg->addr == steer_addr) {
     int desired_torque = from_offset((GET_BYTES_LE(msg, 5, 2) >> 1U) & 0x7FFU, 1024);
     bool steer_req = GET_BIT(msg, 52U);
@@ -168,12 +176,14 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+#ifdef ALLOW_DEBUG
   // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
   if ((safety_setup.hyundai_canfd_lka_steer_msg && (msg->addr == 0x730U)) || (!safety_setup.hyundai_camera_scc && (msg->addr == 0x7D0U))) {
     if (GET_BYTES_64_LE(msg, 0, 8) != 0x0000000000803E02ULL) {
       tx = false;
     }
   }
+#endif
 
   // ACCEL: safety check
   if (msg->addr == 0x1a0U) {
@@ -182,11 +192,15 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
 
     bool violation = false;
 
+#ifdef ALLOW_DEBUG
     if (safety_setup.hyundai_longitudinal) {
       const bool raw_violation = longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
       const bool val_violation = longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
       violation = raw_violation || val_violation;
     } else {
+#else
+    {
+#endif
       // only used to cancel on here
       const uint8_t acc_mode = (msg->data[8] >> 4) & 0x7U;
       if (acc_mode != 4U) {
@@ -218,6 +232,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     HYUNDAI_CANFD_LKA_STEER_MSG_ALT_COMMON_TX_MSGS(0, 1)
   };
 
+#ifdef ALLOW_DEBUG
   static const CanMsg HYUNDAI_CANFD_LKA_STEER_MSG_LONG_TX_MSGS[] = {
     HYUNDAI_CANFD_LKA_STEER_MSG_COMMON_TX_MSGS(0, 1)
     HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(1)
@@ -230,6 +245,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     {0x345, 1,  8, .check_relay = false},  // ADRV_0x345
     {0x1DA, 1, 32, .check_relay = false},  // ADRV_0x1da
   };
+#endif
 
   static const CanMsg HYUNDAI_CANFD_LFA_STEERING_TX_MSGS[] = {
     HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(2)
@@ -237,6 +253,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(0, false)
   };
 
+#ifdef ALLOW_DEBUG
   // ADRV_0x160 is checked for radar liveness
   static const CanMsg HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS[] = {
     HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(2)
@@ -245,6 +262,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     {0x160, 0, 16, .check_relay = true},  // ADRV_0x160
     {0x7D0, 0, 8, .check_relay = false},  // tester present for radar ECU disable
   };
+#endif
 
   // ADRV_0x160 is checked for relay malfunction
 #define HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS(longitudinal) \
@@ -259,6 +277,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   safety_setup.hyundai_canfd_lka_steer_msg_alt = GET_FLAG(param, HYUNDAI_PARAM_CANFD_LKA_STEER_MSG_ALT);
 
   safety_config ret;
+#ifdef ALLOW_DEBUG
   if (safety_setup.hyundai_longitudinal) {
     if (safety_setup.hyundai_canfd_lka_steer_msg) {
       static const RxCheck hyundai_canfd_lka_steer_msg_long_rx_checks[] = {
@@ -293,6 +312,9 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       }
     }
   } else {
+#else
+  {
+#endif
     if (safety_setup.hyundai_canfd_lka_steer_msg) {
       // *** LKA steering checks ***
       // E-CAN is on bus 1, SCC messages are sent on cars with ADRV ECU.

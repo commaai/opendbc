@@ -1,76 +1,51 @@
 #!/usr/bin/env bash
 set -e
 
+# Checks the safety code for MISRA C:2012 violations with misrable, and runs cppcheck's generic checks.
+#
+# Scope: main.c includes all of the safety code (safety.h and ignition.h). Both builds, release and ALLOW_DEBUG,
+# are checked with the compiler flags that change how panda's firmware build translates it (Dir 1.1).
+# external_api.txt lists what panda's firmware and the tests use, so the checks see the whole system.
+# misrable checks every rule; `misrable --list-rules` shows how far each check goes. Directives:
+#   * 4.3, 4.10 and 4.12 are checked by misrable; 2.1, 4.1 and 4.11 by the rules they map to (1.1, 1.3, 18.1).
+#   * 4.7: Rule 17.7 reports every discarded result. The (void) casts in safety.h discard errors that are handled
+#     already: safety_redundancy_check sets the fault itself, and set_safety_hooks returns copy A's status.
+#   * 4.14: CAN messages are the only external input; the RX checks validate them (length, checksum, counter,
+#     quality flag, timing) before a safety mode uses one, and the rules treat their contents as any value.
+#   * The rest are advisory or about the development process.
+#
+# Deviations, each documented where it is suppressed:
+#   * Rule 1.2 (advisory) in can.h: CANPacket_t needs __attribute__((packed, aligned(4))) for panda's packet layout.
+#     Risk: none in practice, gcc and clang are the only compilers that build the safety code and both support it.
+#   * Rule 8.9 (advisory) in safety.h: safety_hook_registry stays at file scope, next to the hooks it lists.
+#     Risk: none, it's a const table.
+#
+# Rules 2.1, 2.2 and 14.3 (unreachable code, dead code and invariant conditions) need runtime values that a static
+# check can't always know. misrable reports what it can prove, and the safety tests cover the rest: they must reach
+# every line and branch of the ALLOW_DEBUG build (tests/test.sh), and mutation testing (tests/mutation.py) shows
+# that each operator changes what the tests observe.
+# TODO: the same coverage for the release build, and mutants that delete statements and operands.
+#
+# Rule 1.3 (undefined behavior) assumes the execution model in declarations.h: the entry points never run
+# concurrently or re-enter one another, and only they write the safety state. The entry points check the first part
+# at runtime: a call that breaks it changes nothing and sets safety_redundancy_fault, see declarations.h.
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $DIR
 
 source ../../../../setup.sh
 
-GREEN="\e[1;32m"
-YELLOW="\e[1;33m"
-RED="\e[1;31m"
-NC='\033[0m'
+cd ${OPENDBC_ROOT:-$BASEDIR}
 
-: "${CPPCHECK_DIR:=$(python3 -c "import cppcheck; print(cppcheck.DIR)")}"
+# panda's firmware flags that change the translation, see `misrable --help`
+PANDA_CFLAGS="-mcpu=cortex-m7 -mthumb -mlittle-endian -mhard-float -mfpu=fpv5-d16 -std=gnu11 -fsingle-precision-constant"
 
-# ensure checked in coverage table is up to date
-python3 $CPPCHECK_DIR/addons/misra.py -generate-table > coverage_table
-if ! git diff --quiet coverage_table; then
-  echo -e "${YELLOW}MISRA coverage table doesn't match. Update and commit:${NC}"
-  exit 3
-fi
+misrable -I . --inline-suppr --external-api opendbc/safety/tests/misra/external_api.txt \
+         --config= --config=-DALLOW_DEBUG $PANDA_CFLAGS opendbc/safety/tests/misra/main.c
 
-cd $BASEDIR
-
-CHECKLIST=$(mktemp)
-echo "Cppcheck checkers list from test_misra.sh:" > $CHECKLIST
-
-cppcheck() {
-  # get all gcc defines: arm-none-eabi-gcc -dM -E - < /dev/null
-  # cppcheck does not provide __has_include_next, which is used by Clang's stdint.h
-  # cppcheck does not provide Clang's feature/module builtins used by stddef.h
-  # (including Apple Clang's resource headers).
-  COMMON_DEFINES="-D__GNUC__=9 -D__has_include_next(x)=0 -D__has_feature(x)=0 -D__building_module(x)=0 -D__has_extension(x)=0 -D__has_builtin(x)=0 -D__has_attribute(x)=0"
-
-  # note that cppcheck build cache results in inconsistent results as of v2.13.0
-  OUTPUT=$(mktemp)
-
-  echo -e "\n\n\n\n\nTEST variant options:" >> $CHECKLIST
-  echo -e ""${@//$BASEDIR/}"\n\n" >> $CHECKLIST # (absolute path removed)
-
-  OPENDBC_ROOT=${OPENDBC_ROOT:-$BASEDIR}
-  $CPPCHECK_DIR/cppcheck --inline-suppr -I $OPENDBC_ROOT \
-          -I "$(cc -print-file-name=include)" \
-          --suppress=missingIncludeSystem \
-          --suppress=*:*include/* \
-          --suppressions-list=$DIR/suppressions.txt  \
-           --error-exitcode=2 --check-level=exhaustive --safety \
-          --platform=arm32-wchar_t4 $COMMON_DEFINES --checkers-report=$CHECKLIST.tmp \
-          --std=c11 "$@" 2>&1 | tee $OUTPUT
-
-  cat $CHECKLIST.tmp >> $CHECKLIST
-  rm $CHECKLIST.tmp
-  # cppcheck bug: some MISRA errors won't result in the error exit code,
-  # so check the output (https://trac.cppcheck.net/ticket/12440#no1)
-  if grep -e "misra violation" -e "error" -e "style: " $OUTPUT > /dev/null; then
-    printf "${RED}** FAILED: MISRA violations found!${NC}\n"
-    exit 1
-  fi
-}
-
-OPTS=" --enable=all --enable=unusedFunction --addon=misra"
-
-printf "\n${GREEN}** Safety **${NC}\n"
-cppcheck $OPTS $BASEDIR/opendbc/safety/tests/misra/main.c
-
-printf "\n${GREEN}Success!${NC} took $SECONDS seconds\n"
-
-# ensure list of checkers is up to date
-if [ -z "$OPENDBC_ROOT" ]; then
-  cd $DIR
-  if ! git diff --quiet $CHECKLIST; then
-    echo -e "\n${YELLOW}WARNING: Cppcheck checkers.txt report has changed. Review and commit...${NC}"
-    mv $CHECKLIST $DIR/checkers.txt
-    exit 4
-  fi
-fi
+# cppcheck checks only the configuration given with -D, so each build gets its own run
+for config in "" -DALLOW_DEBUG; do
+  cppcheck --enable=all --check-level=exhaustive --safety --inline-suppr --error-exitcode=1 --quiet \
+           --platform=arm32-wchar_t4 --std=c11 -D__GNUC__=9 $config -I . --suppress=missingIncludeSystem \
+           --suppress=checkersReport opendbc/safety/tests/misra/main.c
+done

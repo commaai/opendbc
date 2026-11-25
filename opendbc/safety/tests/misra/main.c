@@ -1,4 +1,6 @@
 #include "opendbc/safety/safety.h"
+// panda's firmware includes ignition.h after safety.h
+#include "opendbc/safety/ignition.h"
 
 // this file is checked by cppcheck
 
@@ -20,5 +22,7 @@ int main(void) {
   SAFETY_UNUSED(safety_heartbeat_check);
   SAFETY_UNUSED(safety_alternative_experience);
   SAFETY_UNUSED(set_safety_hooks);
+  SAFETY_UNUSED(ignition_can_hook);
+  SAFETY_UNUSED(ignition_can_reset);
   return 0;
 }
