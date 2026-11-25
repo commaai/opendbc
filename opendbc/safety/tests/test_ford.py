@@ -109,12 +109,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
     values = {"VehStop_D_Stat": 1 if speed <= self.STANDSTILL_THRESHOLD else random.choice((0, 2, 3))}
     return self.packer.make_can_msg_safety("DesiredTorqBrk", 0, values)
 
-  RX_QUALITY_FLAGS = {
-    "BrakeSysFeatures": {"VehVActlBrk_D_Qf": (3,)},
-    "EngVehicleSpThrottle2": {"VehVActlEng_D_Qf": (3,)},
-    "Yaw_Data_FD1": {"VehYawWActl_D_Qf": (3,)},
-  }
-
   # Current curvature
   def _yaw_rate_msg(self, curvature: float, speed: float):
     values = {"VehYaw_W_Actl": curvature * speed, "VehYawWActl_D_Qf": 3}

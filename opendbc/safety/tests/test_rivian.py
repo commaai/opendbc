@@ -32,12 +32,6 @@ class TestRivianSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafe
   cnt_brake = 0
   cnt_pcm = 0
 
-  RX_QUALITY_FLAGS = {
-    "ESP_Status": {"ESP_Vehicle_Speed_Q": (1,)},
-    "VDM_PropStatus": {"VDM_VehicleSpeedQ": (1,)},
-    "iBESP2": {"iBESP2_BrakePedalApplied_Q": (1,)},
-  }
-
   def _torque_driver_msg(self, torque):
     values = {"EPAS_TorsionBarTorque": torque / 100.0, "EPAS_SystemStatus_Counter": self.cnt_torque % 15}
     self.__class__.cnt_torque += 1

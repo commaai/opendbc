@@ -80,12 +80,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     values = {"ESP_driverBrakeApply": 2 if brake else 1}
     return self.packer.make_can_msg_safety("ESP_status", 0, values)
 
-  # ESP_driverBrakeApply 0 is NotInit_orOff, 3 is Faulty_SNA
-  RX_QUALITY_FLAGS = {
-    "ESP_B": {"ESP_wheelSpeedsQF": (1,)},
-    "ESP_status": {"ESP_driverBrakeApply": (1, 2)},
-  }
-
   def _speed_msg(self, speed):
     values = {"DI_vehicleSpeed": speed * 3.6}
     return self.packer.make_can_msg_safety("DI_speed", 0, values)

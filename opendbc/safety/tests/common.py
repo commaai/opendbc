@@ -1210,13 +1210,10 @@ class CarSafetyTest(SafetyTest):
   def _pcm_status_msg(self, enable):
     pass
 
-  # {msg name: {signal: valid values}} of the quality flags of the RX checked msgs
-  RX_QUALITY_FLAGS: dict[str, dict[str, tuple[int, ...]]] = {}
-
   def _rx_check_msg(self, addr: int, bus: int, values: dict[str, float] | None = None):
     """The RX checked msg's next frame, valid unless values say otherwise"""
-    name = self.packer.dbc.addr_to_msg[addr].name
-    quality_flags = {sig: valid[0] for sig, valid in self.RX_QUALITY_FLAGS.get(name, {}).items()}
+    sigs = self.packer.dbc.addr_to_msg[addr].sigs.values()
+    quality_flags = {sig.name: sig.quality_flag_values[0] for sig in sigs if sig.quality_flag_values is not None}
     return self.packer.make_can_msg_safety(addr, bus, {**quality_flags, **(values or {})})
 
   def _rx_check_builders(self):
@@ -1386,14 +1383,16 @@ class CarSafetyTest(SafetyTest):
       if m.ignore_quality_flag:
         continue
       msg = self.packer.dbc.addr_to_msg[m.addr]
-      for sig, valid in self.RX_QUALITY_FLAGS[msg.name].items():
-        for value in range(1 << msg.sigs[sig].size):
-          err_msg = f"{msg.name} {sig}={value}"
+      flags = [(sig, sig.quality_flag_values) for sig in msg.sigs.values() if sig.quality_flag_values is not None]
+      self.assertTrue(flags, f"{msg.name}: the DBC marks none of its signals as quality flags")
+      for sig, valid in flags:
+        for value in range(1 << sig.size):
+          err_msg = f"{msg.name} {sig.name}={value}"
           self._reset_safety_hooks()
           if value in valid:
-            self.assertTrue(self._rx(build({sig: value})), err_msg)
+            self.assertTrue(self._rx(build({sig.name: value})), err_msg)
           else:
-            self.assertTrue(self._rx_invalid(build({sig: value}), err_msg), err_msg)
+            self.assertTrue(self._rx_invalid(build({sig.name: value}), err_msg), err_msg)
 
   def test_gas_pressed_bits(self):
     self._test_signal_bits(self._user_gas_msg, self.safety.get_gas_pressed_prev, self.GAS_PRESSED_THRESHOLD)
