@@ -137,11 +137,16 @@ class CarController(CarControllerBase):
       if len(CC.orientationNED) == 3:
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
 
+      # like stock, leave small decels to engine braking at speed, and never request gas while braking
+      brake_threshold = float(np.interp(CS.out.vEgo, [3., 10.], [0., -0.6]))
       accel_pitch_compensated = accel + accel_due_to_pitch
-      if accel_pitch_compensated > 0.3 or not CC.longActive:
+      if accel_pitch_compensated > brake_threshold + 0.3 or not CC.longActive:
         self.brake_request = False
-      elif accel_pitch_compensated < 0.0:
+      elif accel_pitch_compensated < brake_threshold:
         self.brake_request = True
+
+      if self.brake_request:
+        gas = CarControllerParams.INACTIVE_GAS
 
       stopping = CC.actuators.longControlState == LongCtrlState.stopping
       # TODO: look into using the actuators packet to send the desired speed
