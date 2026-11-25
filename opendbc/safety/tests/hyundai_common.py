@@ -39,10 +39,6 @@ class HyundaiButtonBase(common.CarSafetyTest):
       self._rx(self._pcm_status_msg(enabled))
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL, bus=self.BUTTONS_TX_BUS)))
 
-  def _engage(self):
-    self._rx(self._button_msg(Buttons.RESUME))
-    super()._engage()
-
   def test_enable_control_allowed_from_cruise(self):
     """
       Hyundai non-longitudinal only enables on PCM rising edge and recent button press. Tests PCM enabling with:
@@ -95,10 +91,6 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
   def test_sampling_cruise_buttons(self):
     pass
-
-  def _engage(self):
-    self._rx(self._button_msg(Buttons.SET))
-    self._rx(self._button_msg(Buttons.NONE))
 
   def test_cruise_engaged_prev(self):
     pass

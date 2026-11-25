@@ -508,8 +508,7 @@ static int ROUND(float val) {
 }
 
 // the only writers of controls_allowed (see test_globals.py)
-// every engagement goes through here, even if controls are already allowed:
-// a stale heartbeat mismatch count from a refused engagement must not disengage the next one
+// every engagement resets the heartbeat mismatches, even if controls are already allowed from one openpilot refused
 static void enter_controls(void) {
   safety.controls_allowed = true;
   safety.heartbeat_engaged_mismatches = 0U;

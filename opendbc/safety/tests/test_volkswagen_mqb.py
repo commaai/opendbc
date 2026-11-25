@@ -150,11 +150,6 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   def test_cruise_engaged_prev(self):
     pass
 
-  def _engage(self):
-    self._rx(self._tsk_status_msg(False, main_switch=True))
-    self._rx(self._gra_acc_01_msg(_set=True, bus=0))
-    self._rx(self._gra_acc_01_msg(bus=0))
-
   def test_set_and_resume_buttons(self):
     for button in ["set", "resume"]:
       # ACC main switch must be on, engage on falling edge

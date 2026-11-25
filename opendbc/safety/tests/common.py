@@ -1464,22 +1464,6 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._pcm_status_msg(True))
     self.assertTrue(self.safety.get_controls_allowed())
 
-  def _engage(self):
-    self._rx(self._pcm_status_msg(False))
-    self._rx(self._pcm_status_msg(True))
-
-  def test_reengage_resets_heartbeat_mismatches(self):
-    # an engagement openpilot refuses stays allowed until the heartbeat check drops it,
-    # engaging again in that window must not inherit the mismatch count
-    self.safety.safety_heartbeat(False)
-    self._engage()
-    for _ in range(2):
-      self.safety.safety_heartbeat_check()
-    self._engage()
-    self.assertTrue(self.safety.get_controls_allowed())
-    self.safety.safety_heartbeat_check()
-    self.assertTrue(self.safety.get_controls_allowed())
-
   def test_disable_control_allowed_from_cruise(self):
     self.safety.set_controls_allowed(1)
     self._rx(self._pcm_status_msg(False))

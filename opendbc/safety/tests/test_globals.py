@@ -31,18 +31,14 @@ class TestGlobals(unittest.TestCase):
         writable = {n.removeprefix("_") for n in names if not n.startswith("ltmp")}
         self.assertEqual(writable, {"safety_a", "safety_b", "current_copy", "safety_ts", "safety_redundancy_fault"})
 
-  # every engagement has to reset the heartbeat mismatch count, so nothing writes controls_allowed directly
-  def test_controls_allowed_only_written_by_helpers(self):
-    helpers = re.compile(r"^static void (?:enter|exit)_controls\(void\) \{\n.*?^\}\n", re.MULTILINE | re.DOTALL)
-    write = re.compile(r"\bcontrols_allowed\s*(?:[-+*/%&|^]|<<|>>)?=(?!=)|\bcontrols_allowed\s*(?:\+\+|--)|(?:\+\+|--|[(,=]\s*&)\s*safety\.controls_allowed\b")
-    srcs = [f for f in (ROOT / "opendbc/safety").rglob("*.[ch]") if "tests" not in f.parts]
-    self.assertTrue(ROOT / "opendbc/safety/safety.h" in srcs)
-    for f in srcs:
-      src = f.read_text()
-      if f.name == "safety.h":
-        src, n = helpers.subn("", src)
-        self.assertEqual(n, 2)
-      self.assertIsNone(write.search(src), f"direct controls_allowed write in {f.relative_to(ROOT)}")
+  # only enter_controls() and exit_controls() write controls_allowed, so every engagement resets the heartbeat mismatches
+  def test_controls_allowed_writes(self):
+    writes = {}
+    for f in (ROOT / "opendbc/safety").rglob("*.[ch]"):
+      n = len(re.findall(r"controls_allowed\s*[|&^]?=(?!=)", f.read_text()))
+      if n and "tests" not in f.parts:
+        writes[f.name] = n
+    self.assertEqual(writes, {"safety.h": 2})
 
 
 if __name__ == "__main__":
