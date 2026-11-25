@@ -14,10 +14,8 @@ class CarInterface(CarInterfaceBase):
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.byd)]
 
-    ret.dashcamOnly = True
-
     ret.steerControlType = structs.CarParams.SteerControlType.angle
-    ret.steerActuatorDelay = 0.2
+    ret.steerActuatorDelay = 0.35
     ret.steerLimitTimer = 0.4
 
     ret.radarUnavailable = True

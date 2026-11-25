@@ -75,6 +75,28 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"RAW_THROTTLE": int(gas * 100)}
     return self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, values)
 
+  def _driver_torque_msg(self, torque: int):
+    values = {"STEER_ANGLE_2": 0, "DRIVER_EPS_TORQUE": torque}
+    return self.packer.make_can_msg_safety("STEER_MODULE_2", self.MAIN_BUS, values)
+
+  def test_steering_wheel_disengage(self):
+    # DRIVER_EPS_TORQUE is the column sensor as an unsigned magnitude. Past the threshold the
+    # driver has taken the wheel, and openpilot must not recover until controls are re-enabled.
+    threshold = CarControllerParams.STEER_DRIVER_DISENGAGE
+    for torque in range(threshold + 10):
+      with self.subTest(torque=torque):
+        self.safety.set_controls_allowed(True)
+        should_disengage = torque > threshold
+
+        self.assertTrue(self._rx(self._driver_torque_msg(torque)))
+        self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+        self.assertEqual(should_disengage, self.safety.get_steering_disengage_prev())
+
+        # releasing the wheel must not re-enable controls
+        self.assertTrue(self._rx(self._driver_torque_msg(0)))
+        self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+        self.assertFalse(self.safety.get_steering_disengage_prev())
+
   def test_cruise_states(self):
     for state in range(8):
       self._rx(self._pcm_status_msg(False))

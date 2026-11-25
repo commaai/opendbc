@@ -4,8 +4,18 @@
 #include "opendbc/safety/declarations.h"
 
 static uint8_t byd_get_counter(const CANPacket_t *msg) {
-  // Speed uses the high nibble; cruise status uses the low nibble.
-  return (msg->addr == 0x1F0U) ? (msg->data[6] >> 4) : (msg->data[6] & 0xFU);
+  uint8_t cnt;
+  if (msg->addr == 0x11FU) {
+    // STEER_MODULE_2 is 5 bytes: COUNTER is the low nibble of the last byte
+    cnt = msg->data[4] & 0xFU;
+  } else if (msg->addr == 0x1F0U) {
+    // Speed uses the high nibble
+    cnt = msg->data[6] >> 4;
+  } else {
+    // cruise status uses the low nibble
+    cnt = msg->data[6] & 0xFU;
+  }
+  return cnt;
 }
 
 static uint32_t byd_get_checksum(const CANPacket_t *msg) {
@@ -20,11 +30,18 @@ static uint32_t byd_compute_checksum(const CANPacket_t *msg) {
   return 0xFFU - (uint32_t)sum;
 }
 
+// Matches CarControllerParams.STEER_DRIVER_DISENGAGE
+#define BYD_STEER_DRIVER_DISENGAGE 30U
+
 static void byd_rx_hook(const CANPacket_t *msg) {
   // Steering angle: 0.1 deg/LSB, signed
   if (msg_matches(msg, 0x11FU, 0U)) {
     int angle_meas_new = to_signed(GET_BYTES_LE(msg, 0, 2), 16);  // STEER_ANGLE_2
     update_sample(&safety.angle_meas, angle_meas_new);
+
+    // DRIVER_EPS_TORQUE is the column sensor as an unsigned magnitude. Mirrors
+    // CarControllerParams.STEER_DRIVER_DISENGAGE so the driver can always take over.
+    safety.steering_disengage = msg->data[2] > BYD_STEER_DRIVER_DISENGAGE;
   }
 
   // Vehicle speed: 0.1 kph/LSB
@@ -99,7 +116,7 @@ static safety_config byd_init(uint16_t param) {
   };
 
   static const RxCheck byd_rx_checks[] = {
-    {.msg = {{0x11F, 0, 5, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_MODULE_2 (steering angle)
+    {.msg = {{0x11F, 0, 5, 100U, .max_counter = 15U, .ignore_checksum = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // STEER_MODULE_2 (steering angle)
     {.msg = {{0x1F0, 0, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // WHEELSPEED_CLEAN (vehicle speed)
     {.msg = {{0x242, 0, 8,  50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // DRIVE_STATE (gas and brake pressed)
     {.msg = {{0x32D, 2, 8,  50U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // ACC_HUD_ADAS (cruise state)

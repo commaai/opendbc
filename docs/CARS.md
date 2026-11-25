@@ -34,7 +34,7 @@
 |Audi|Q5 2017-24|All|[Not compatible](#flexray)|
 |Audi|RS3 2018|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|S3 2015-17|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|BYD|Atto 3 2022-25|All|[Dashcam mode](#dashcam)|
+|BYD|Atto 3 2022-25|All|[Upstream](#upstream)|
 |Chevrolet|Bolt EUV 2022-23|Premier or Premier Redline Trim, without Super Cruise Package|[Upstream](#upstream)|
 |Chevrolet|Bolt EV 2022-23|2LT Trim with Adaptive Cruise Control Package|[Upstream](#upstream)|
 |Chevrolet|Equinox 2019-22|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
