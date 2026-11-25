@@ -214,7 +214,8 @@ class TestFwFingerprintTiming(unittest.TestCase):
 
   @staticmethod
   def fake_can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
-    return ([[CanData(random.randint(0x600, 0x800), b'\x00' * 8, 0)]]
+    # Noise can match a queried address; keep its ISO-TP single-frame length valid.
+    return ([[CanData(random.randint(0x600, 0x800), b'\x01' + b'\x00' * 7, 0)]]
             if random.uniform(0, 1) > 0.5 else [])
 
   def fake_set_obd_multiplexing(self, obd_multiplexing):
