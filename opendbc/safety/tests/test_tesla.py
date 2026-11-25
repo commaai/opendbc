@@ -173,6 +173,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self._rx(self.packer.make_can_msg_safety("DI_state", 0, {"DI_cruiseState": state}))
       self.assertEqual(state in (2, 3, 4, 6, 7), self.safety.get_controls_allowed())
 
+  def test_autopark_assumed_at_init(self):
+    # DI_state is a low frequency msg, so Autopark is assumed active until it says otherwise (init_tests clears it)
+    self._reset_safety_hooks()
+    self.assertTrue(self.safety.safety_a.state.tesla_autopark)
+
   def test_autopark_summon_while_enabled(self):
     # We should not respect Autopark that activates while controls are allowed
     self._rx(self._pcm_status_msg(True, 0))

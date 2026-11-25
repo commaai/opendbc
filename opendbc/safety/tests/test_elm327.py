@@ -38,6 +38,11 @@ class TestElm327(TestDefaultRxHookBase):
     # test GM camera diagnostic address with malformed length
     self.assertEqual(False, self._tx(common.make_msg(0, GM_CAMERA_DIAG_ADDR, dat=bytes([0x00] * 7))))
 
+  def test_tx_uds_request(self):
+    # the quick check of test_tx_hook: an 8 byte UDS request is allowed on every bus
+    for bus in range(4):
+      self.assertTrue(self._tx(common.make_msg(bus, 0x7E0, 8)))
+
   def test_tx_hook_on_wrong_safety_mode(self):
     # No point, since we allow many diagnostic addresses
     pass
