@@ -77,7 +77,9 @@ def get_cached_segment(route: str, segment: int) -> Path:
 
 
 def get_cached_url(url: str) -> Path:
-  cache_path = DOWNLOAD_CACHE_ROOT / f"{hashlib.sha256(url.encode()).hexdigest()}{Path(url).suffix}"
+  # the API signs its URLs again on each request
+  base = url.split('?', 1)[0]
+  cache_path = DOWNLOAD_CACHE_ROOT / f"{hashlib.sha256(base.encode()).hexdigest()}{Path(base).suffix}"
   if not cache_path.exists():
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = cache_path.with_suffix(f".{os.getpid()}.tmp")
