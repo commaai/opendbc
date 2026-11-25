@@ -24,7 +24,7 @@ static void body_rx_hook(const CANPacket_t *msg) {
   SAFETY_UNUSED(msg);
 
   // controls allowed as soon as RX is valid
-  safety.controls_allowed = true;
+  enter_controls();
 }
 
 static bool body_tx_hook(const CANPacket_t *msg) {

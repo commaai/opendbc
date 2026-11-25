@@ -181,14 +181,12 @@ static bool rx_msg_safety_check(const CANPacket_t *msg,
   }
   bool valid = is_msg_valid(index);
   if (!valid) {
-    safety.controls_allowed = false;
+    exit_controls();
   }
   return valid;
 }
 
 static bool rx_hook_copy(const CANPacket_t *msg) {
-  bool controls_allowed_prev = safety.controls_allowed;
-
   bool valid = rx_msg_safety_check(msg, &safety_setup.current_safety_config, safety_setup.current_hooks);
   bool whitelisted = get_addr_check_index(msg, safety_setup.current_safety_config.rx_checks, safety_setup.current_safety_config.rx_checks_len) != -1;
   if (valid && whitelisted) {
@@ -207,11 +205,6 @@ static bool rx_hook_copy(const CANPacket_t *msg) {
     if (m->check_relay) {
       stock_ecu_check((m->addr == addr) && (m->bus == msg->bus));
     }
-  }
-
-  // reset mismatches on rising edge of controls_allowed to avoid rare race condition
-  if (safety.controls_allowed && !controls_allowed_prev) {
-    safety.heartbeat_engaged_mismatches = 0;
   }
 
   return valid;
@@ -290,7 +283,7 @@ static void tick_copy(void) {
     status->lagging = elapsed_time > 1000000U;
     if (status->lagging || !is_msg_valid(i)) {
       rx_checks_invalid = true;
-      safety.controls_allowed = false;
+      exit_controls();
     }
   }
 
@@ -302,7 +295,7 @@ static void heartbeat_check_copy(void) {
   if (safety.controls_allowed && !safety.heartbeat_engaged) {
     safety.heartbeat_engaged_mismatches += 1U;
     if (safety.heartbeat_engaged_mismatches >= 3U) {
-      safety.controls_allowed = false;
+      exit_controls();
     }
   } else {
     safety.heartbeat_engaged_mismatches = 0U;
@@ -316,7 +309,7 @@ static void relay_malfunction_set(void) {
 // exit controls on rising edge of a press, or on any press when while_held
 static void disengage_on_press(bool pressed, bool *pressed_prev, bool while_held) {
   if (pressed && (!*pressed_prev || while_held)) {
-    safety.controls_allowed = false;
+    exit_controls();
   }
   *pressed_prev = pressed;
 }
@@ -514,13 +507,24 @@ static int ROUND(float val) {
   return (int)rounded;
 }
 
+// the only writers of controls_allowed (see test_globals.py)
+// every engagement resets the heartbeat mismatches, even if controls are already allowed from one openpilot refused
+static void enter_controls(void) {
+  safety.controls_allowed = true;
+  safety.heartbeat_engaged_mismatches = 0U;
+}
+
+static void exit_controls(void) {
+  safety.controls_allowed = false;
+}
+
 static void pcm_cruise_check(bool cruise_engaged) {
   // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
   if (!cruise_engaged) {
-    safety.controls_allowed = false;
+    exit_controls();
   }
   if (cruise_engaged && !safety.cruise_engaged_prev) {
-    safety.controls_allowed = true;
+    enter_controls();
   }
   safety.cruise_engaged_prev = cruise_engaged;
 }
@@ -532,7 +536,7 @@ static void speed_mismatch_check(const float speed_2) {
   const int MAX_SPEED_DELTA = 2 * (int)VEHICLE_SPEED_FACTOR;  // 2 m/s
   const int speed_delta = ROUND(speed_2 * VEHICLE_SPEED_FACTOR) - safety.vehicle_speed.values[0];
   if (safety_max_limit_check(speed_delta, MAX_SPEED_DELTA, -MAX_SPEED_DELTA)) {
-    safety.controls_allowed = false;
+    exit_controls();
   }
 }
 

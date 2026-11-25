@@ -261,6 +261,17 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 
+  def test_reengage_resets_heartbeat_mismatches(self):
+    # openpilot refuses RESUME, then engages with SET right before the heartbeat check would time out the RESUME
+    self.safety.safety_heartbeat(False)
+    self._rx(self._tsk_status_msg(False, main_switch=True))
+    for button in ("resume", "set"):
+      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
+      self._rx(self._button_msg(bus=0))
+      self.safety.safety_heartbeat_check()
+      self.safety.safety_heartbeat_check()
+      self.assertTrue(self.safety.get_controls_allowed())
+
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False, main_switch=True))
