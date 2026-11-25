@@ -36,7 +36,7 @@ class TestGlobals(unittest.TestCase):
     helpers = re.compile(r"^static void (?:enter|exit)_controls\(void\) \{\n.*?^\}\n", re.MULTILINE | re.DOTALL)
     write = re.compile(r"\bcontrols_allowed\s*(?:[-+*/%&|^]|<<|>>)?=(?!=)|\bcontrols_allowed\s*(?:\+\+|--)|(?:\+\+|--|[(,=]\s*&)\s*safety\.controls_allowed\b")
     srcs = [f for f in (ROOT / "opendbc/safety").rglob("*.[ch]") if "tests" not in f.parts]
-    self.assertIn(ROOT / "opendbc/safety/safety.h", srcs)
+    self.assertTrue(ROOT / "opendbc/safety/safety.h" in srcs)
     for f in srcs:
       src = f.read_text()
       if f.name == "safety.h":
