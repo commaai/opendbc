@@ -173,6 +173,8 @@ def create_aeb_hud(packer, aeb_supported, fcw_active):
 
 
 def volkswagen_mqb_meb_checksum(address: int, sig, d: bytearray) -> int:
+  if len(d) < 2:
+    return 0
   crc = 0xFF
   for i in range(1, len(d)):
     crc ^= d[i]
@@ -186,6 +188,8 @@ def volkswagen_mqb_meb_checksum(address: int, sig, d: bytearray) -> int:
 
 
 def volkswagen_mqb_meb_dyn_len_checksum(address: int, sig, d: bytearray, length: int, const: list[int]) -> int:
+  if len(d) < 2 or len(d) < length:
+    return 0
   d = d[:length]
   crc = 0xFF
   for i in range(1, len(d)):
@@ -198,6 +202,8 @@ def volkswagen_mqb_meb_dyn_len_checksum(address: int, sig, d: bytearray, length:
 
 
 def volkswagen_meb_alt_crc_checksum(address: int, sig, d: bytearray) -> int:
+  if not d:
+    return 0
   entry = VOLKSWAGEN_MEB_ALT_CRC_CONSTANTS.get(address)
   if entry:
     length, const = entry

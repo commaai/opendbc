@@ -33,12 +33,16 @@ def create_lka_steering(packer, counter, apply_torque, active):
 
 def mg_checksum(address: int, sig, d: bytearray) -> int:
   if address == 0x1EC:
+    if len(d) < 7:
+      return 0
     torque = ((d[0] & 0x7) << 8) | d[1]
     valid = (d[0] >> 3) & 1
     status = (d[6] >> 4) & 0x7
     counter = d[0] >> 4
     return -((torque << 1) + (status << 12) + valid + counter) & 0x7FFF
 
+  if not d:
+    return 0
   crc = 0xFF
   for byte in d[:-1]:
     crc = CRC8J1850[crc ^ byte]
