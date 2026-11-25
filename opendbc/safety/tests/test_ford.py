@@ -182,18 +182,6 @@ class TestFordSafetyBase(common.CarSafetyTest):
     }
     return self.packer.make_can_msg_safety("Steering_Data_FD1", bus, values)
 
-  def test_rx_hook_speed_mismatch(self):
-    for speed in np.arange(0, 40, 0.5):
-      for speed_delta in np.arange(-5, 5, 0.1):
-        speed_2 = round(max(speed + speed_delta, 0), 1)
-        self._rx(self._speed_msg(speed))
-        self._rx(self._speed_msg_2(speed_2))
-        self.safety.set_controls_allowed(True)
-        self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0))
-
-        within_delta = common.speeds_within_delta(speed, speed_2)
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
-
   def test_angle_measurements(self):
     """Tests rx hook correctly parses the curvature measurement from the vehicle speed and yaw rate"""
     for speed in np.arange(0.5, 40, 0.5):
@@ -336,15 +324,16 @@ class TestFordSafetyBase(common.CarSafetyTest):
     for sign in (-1, 1):
       self._reset_curvature_measurement(0, self.CURVATURE_ERROR_MIN_SPEED - 1)
       self._rx(self._speed_msg(self.CURVATURE_ERROR_MIN_SPEED + 1))
+      self.safety.set_controls_allowed(True)
       self._set_prev_desired_angle(sign * self.MAX_CURVATURE_ERROR)
       self.assertFalse(self._tx(self._lat_ctl_msg(True, 0, 0, sign * max_error, 0)))
 
   def test_curvature_violation(self):
     # If violation occurs, curvature cmd is blocked until reset to 0
-    self.safety.set_controls_allowed(True)
     speed = 25.
     max_delta_can = self._get_max_curvature_delta_can(speed)
     self._reset_curvature_measurement(0, speed)
+    self.safety.set_controls_allowed(True)
 
     self._tx(self._lat_ctl_msg(True, 0, 0, 0, 0))
     over_curvature = (max_delta_can + 5) / self.DEG_TO_CAN

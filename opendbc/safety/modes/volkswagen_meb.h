@@ -113,6 +113,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
     ret = BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_TX_MSGS);
   }
+  ret.vehicle_speed_2 = true;
   return ret;
 }
 
@@ -132,7 +133,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, MSG_ESP_21, 0U)) {
     // Signal: ESP_v_Signal
     float esp_speed = (float)GET_BYTES_LE(msg, 4, 2) * 0.01f * KPH_TO_MS;
-    UPDATE_VEHICLE_SPEED_2(esp_speed);
+    update_vehicle_speed_2(esp_speed);
   }
 
   if (msg_matches(msg, MSG_QFK_01, 0U)) {

@@ -148,6 +148,11 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         within_delta = speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
+        # either speed msg checks them
+        self.safety.set_controls_allowed(True)
+        self.assertTrue(self._rx(self._speed_msg(speed)))
+        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
+
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
     # Either when the hands on level is high, or if there is a high angle rate fault

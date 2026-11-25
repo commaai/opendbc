@@ -116,6 +116,20 @@ class SafetyTestBase(unittest.TestCase):
   def _rx(self, msg):
     return self.safety.safety_rx_hook(msg)
 
+  def _speed_msg(self, speed: float):
+    raise NotImplementedError
+
+  def _speed_msg_2(self, speed: float):
+    """The msg of the second speed source at speed, for a safety mode with one (safety_config.vehicle_speed_2)"""
+    return None
+
+  def _reset_speed_measurement(self, speed: float):
+    for _ in range(MAX_SAMPLE_VALS):
+      self._rx(self._speed_msg(speed))
+      speed_2 = self._speed_msg_2(speed)
+      if speed_2 is not None:
+        self._rx(speed_2)
+
   def _tx(self, msg):
     return self.safety.safety_tx_hook(msg)
 
@@ -277,10 +291,6 @@ class TorqueSteeringSafetyTestBase(SafetyTestBase, abc.ABC):
   @abc.abstractmethod
   def _speed_msg(self, speed):
     pass
-
-  def _reset_speed_measurement(self, speed):
-    for _ in range(MAX_SAMPLE_VALS):
-      self._rx(self._speed_msg(speed))
 
   def _set_prev_torque(self, t):
     self.safety.set_desired_torque_last(t)
@@ -472,10 +482,9 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
   def test_against_torque_driver(self):
     # Tests down limits and driver torque blending
-    self.safety.set_controls_allowed(True)
-
     for speed in self._torque_speed_range:
       self._reset_speed_measurement(speed)
+      self.safety.set_controls_allowed(True)
       max_torque = self._get_max_torque(speed)
 
       # Cannot stay at MAX_TORQUE if above DRIVER_TORQUE_ALLOWANCE
@@ -703,10 +712,6 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
     for _ in range(MAX_SAMPLE_VALS):
       self._rx(self._angle_meas_msg(angle))
 
-  def _reset_speed_measurement(self, speed):
-    for _ in range(MAX_SAMPLE_VALS):
-      self._rx(self._speed_msg(speed))
-
   def test_steering_angle_measurements(self):
     self._common_measurement_test(self._angle_meas_msg, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, self.DEG_TO_CAN,
                                   self.safety.get_angle_meas_min, self.safety.get_angle_meas_max)
@@ -795,11 +800,10 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   def test_angle_violation(self):
     # If violation occurs, angle cmd is blocked until reset to 0. Matches behavior of torque safety modes
-    self.safety.set_controls_allowed(True)
-
     for speed in (0., 1., 5., 10., 15., 50.):
-      self._tx(self._angle_cmd_msg(0, True))
       self._reset_speed_measurement(speed)
+      self.safety.set_controls_allowed(True)
+      self._tx(self._angle_cmd_msg(0, True))
 
       for _ in range(20):
         self.assertFalse(self._tx(self._angle_cmd_msg(self._get_steer_cmd_angle_max(speed), True)))
@@ -856,11 +860,6 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
   def _reset_curvature_measurement(self, curvature: float):
     for _ in range(MAX_SAMPLE_VALS):
       self._rx(self._curvature_meas_msg(curvature))
-
-  def _reset_speed_measurement(self, speed: float):
-    for _ in range(MAX_SAMPLE_VALS):
-      self._rx(self._speed_msg(speed))
-      self._rx(self._speed_msg_2(speed))
 
   def test_curvature_measurements(self):
     self._common_measurement_test(self._curvature_meas_msg, -self.MAX_CURVATURE, self.MAX_CURVATURE, self.CURVATURE_TO_CAN,
@@ -1194,10 +1193,6 @@ class CarSafetyTest(SafetyTest):
   def _speed_msg(self, speed):
     pass
 
-  @abc.abstractmethod
-  def _speed_msg_2(self, speed: float):
-    pass
-
   # Safety modes can override if vehicle_moving is driven by a different message
   def _vehicle_moving_msg(self, speed: float):
     return self._speed_msg(speed)
@@ -1528,6 +1523,17 @@ class CarSafetyTest(SafetyTest):
     self._rx(self._vehicle_moving_msg(self.STANDSTILL_THRESHOLD + 1))
     self.assertTrue(self.safety.get_vehicle_moving())
 
+  def test_vehicle_speed_2(self):
+    # the safety config declares the second speed source exactly when the safety mode has one, which is 0 until it's received:
+    # a moving car can't stay engaged without it
+    self.assertEqual(self._speed_msg_2(0) is not None, self.safety.safety_a.setup.current_safety_config.vehicle_speed_2,
+                     "set safety_config.vehicle_speed_2 in the safety mode's init exactly when it has a second speed msg")
+    if self._speed_msg_2(0) is None:
+      raise unittest.SkipTest("No second speed message for this safety mode")
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._rx(self._speed_msg(10)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
   def test_rx_hook_speed_mismatch(self):
     if self._speed_msg_2(0) is None:
       raise unittest.SkipTest("No second speed message for this safety mode")
@@ -1541,6 +1547,11 @@ class CarSafetyTest(SafetyTest):
         self._rx(self._speed_msg_2(speed_2))
 
         within_delta = speeds_within_delta(speed, speed_2)
+        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
+
+        # either speed msg checks them
+        self.safety.set_controls_allowed(True)
+        self.assertTrue(self._rx(self._speed_msg(speed)))
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_safety_tick(self):

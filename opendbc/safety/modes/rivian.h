@@ -69,9 +69,9 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
   if (msg_matches(msg, 0x150U, 0U)) {
     safety.gas_pressed = (msg->data[3] | (msg->data[4] & 0xC0U)) != 0U;
 
-    // Disable controls if speeds from VDM and ESP ECUs are too far apart.
+    // compared to the ESP speed
     float vdm_speed = (float)GET_BYTES_BE(msg, 5, 2) * 0.01f * KPH_TO_MS;
-    speed_mismatch_check(vdm_speed);
+    update_vehicle_speed_2(vdm_speed);
   }
 
   // Driver torque
@@ -174,6 +174,7 @@ static safety_config rivian_init(uint16_t param) {
     }
   #endif
 
+  ret.vehicle_speed_2 = true;
   return ret;
 }
 
