@@ -112,9 +112,13 @@ static void leapmotor_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if ((msg->bus == LEAPMOTOR_CAM_BUS) && (msg->addr == LEAPMOTOR_ADAS_LKA)) {
+  // only rx-checked frames reach this hook, and on the camera bus that is only ADAS_LKA (with the longitudinal flag)
+  if (msg->bus == LEAPMOTOR_CAM_BUS) {
     safety.leapmotor_camera_accel[safety.leapmotor_camera_accel_idx] = msg->data[4];  // ACC_ACCEL_REQ
-    safety.leapmotor_camera_accel_idx = (safety.leapmotor_camera_accel_idx + 1U) % LEAPMOTOR_CAMERA_ACCEL_HISTORY;
+    safety.leapmotor_camera_accel_idx++;
+    if (safety.leapmotor_camera_accel_idx >= LEAPMOTOR_CAMERA_ACCEL_HISTORY) {
+      safety.leapmotor_camera_accel_idx = 0U;
+    }
   }
 }
 

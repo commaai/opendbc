@@ -251,6 +251,13 @@ class TestLeapmotorSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       bad[0] ^= 0x01
       self.assertFalse(self._rx(libsafety_py.make_CANPacket(addr, self.MAIN_BUS, bytes(bad))), hex(addr))
 
+  def test_accel_request_unchecked_without_longitudinal(self):
+    # only with the longitudinal flag is the acceleration request checked: an unknown hard request is then blocked
+    self.safety.set_controls_allowed(False)
+    values = {"STEER_ANGLE_REQ": 0, "LCC_STEERING_ACTIVE_COPY": 0, "ACC_ACCEL_REQ": -5.0}
+    msg = self.packer.make_can_msg_safety("ADAS_LKA", self.MAIN_BUS, values)
+    self.assertEqual(not (self.SAFETY_PARAM & LeapmotorSafetyFlags.LONG_CONTROL), self._tx(msg))
+
 
 class TestLeapmotorLongitudinalSafety(TestLeapmotorSafety, common.LongitudinalAccelSafetyTest):
   SAFETY_PARAM = LeapmotorSafetyFlags.LONG_CONTROL
@@ -325,6 +332,35 @@ class TestLeapmotorLongitudinalSafety(TestLeapmotorSafety, common.LongitudinalAc
     self.assertFalse(self._tx(self._accel_msg(-0.7)))
     self.assertTrue(self._tx(self._accel_msg(-2.6)))
 
+  def test_camera_accel_history_starts_inactive(self):
+    # every slot starts inactive, not at raw 0 (-5.0 m/s^2), so no camera request is assumed before the camera sends one
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(self._accel_msg(-5.0)))
+    self.assertTrue(self._tx(self._accel_msg(0)))
+
+  def test_stock_brake_floor_whole_history(self):
+    # the floor is the least braking of all the recent requests, wherever it is in the history
+    self.safety.set_controls_allowed(True)
+    self._camera_accel(*[-2.5] * 5, -1.0, *[-2.5] * 2)
+    self.assertTrue(self._tx(self._accel_msg(1.0)))
+    self._camera_accel(-2.5)  # -1.0 is still within the last 8
+    self.assertTrue(self._tx(self._accel_msg(1.0)))
+
+  def test_inactive_request_always_allowed(self):
+    # openpilot may always send the inactive request, also when the camera asks for something else
+    self.safety.set_controls_allowed(False)
+    self._camera_accel(*[-1.0] * self.CAMERA_ACCEL_HISTORY)
+    self.assertTrue(self._tx(self._accel_msg(0)))
+    self.assertFalse(self._tx(self._accel_msg(0.5)))
+
+  def test_other_camera_messages_ignored(self):
+    # only the camera's ADAS_LKA is a camera request: the same byte in another camera frame is not
+    self.safety.set_controls_allowed(False)
+    raw = int(round((-4.0 + 5.0) / 0.05))
+    dat = bytearray(16)
+    dat[4] = raw
+    self.assertTrue(self._rx(libsafety_py.make_CANPacket(0x142, 2, bytes(dat))))
+    self.assertFalse(self._tx(self._accel_msg(-4.0)))
 
 if __name__ == "__main__":
   unittest.main()
