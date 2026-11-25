@@ -12,13 +12,16 @@ FW_VERSIONS = {
   CAR.HYUNDAI_AZERA_6TH_GEN: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00IG__ SCC F-CU-      1.00 1.00 99110-G8100         ',
+      b'\xf1\x00IG__ SCC FHCUP      1.00 1.01 96400-G8500         ',
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00IG  MDPS C 1.00 1.02 56310G8510\x00 4IGSC103',
+      b'\xf1\x00IG  MDPS C 1.00 1.01 56310G8350\x00 4IG8C101',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00IG  MFC  AT MES LHD 1.00 1.04 99211-G8100 200511',
       b'\xf1\x00IG  MFC  AT MES LHD 1.00 1.05 99211-G8100 210409',
+      b'\xf1\x00IG  MFC  AT KOR LHD 1.00 1.00 95740-M9200 170919',
     ],
   },
   CAR.HYUNDAI_AZERA_HEV_6TH_GEN: {
