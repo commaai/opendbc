@@ -398,6 +398,7 @@ class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSaf
   """
 
 
+@common.debug_only
 class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
   """
     Covers the Honda Bosch safety mode with longitudinal control
@@ -487,6 +488,7 @@ class TestHondaBoschRadarlessAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschRa
   SAFETY_PARAM = HondaSafetyFlags.RADARLESS | HondaSafetyFlags.ALT_BRAKE
 
 
+@common.debug_only
 class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, HondaButtonEnableBase,
                                         TestHondaBoschRadarlessSafetyBase):
   """

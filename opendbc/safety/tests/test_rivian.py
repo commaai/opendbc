@@ -102,6 +102,7 @@ class TestRivianStockSafety(TestRivianSafetyBase):
         self.assertTrue(self._tx(self.packer.make_can_msg_safety("VDM_AdasSts", 2, values)))
 
 
+@common.debug_only
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
 
   SAFETY_PARAM = RivianSafetyFlags.LONG_CONTROL

@@ -499,6 +499,7 @@ class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):
                                MSG_IPMA_Data]}
 
 
+@common.debug_only
 class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
   SAFETY_PARAM = FordSafetyFlags.LONG_CONTROL | FordSafetyFlags.CANFD
 

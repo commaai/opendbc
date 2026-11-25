@@ -7,6 +7,7 @@ import opendbc.safety.tests.common as common
 LANE_KEEP_ASSIST = 0x3F2
 
 
+@common.debug_only
 class TestPsaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   DBC = "psa_aee2010_r3"
   SAFETY_MODEL = CarParams.SafetyModel.psa

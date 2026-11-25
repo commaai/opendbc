@@ -131,6 +131,7 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
       self.assertEqual(state in (3, 4, 5), self.safety.get_controls_allowed())
 
 
+@common.debug_only
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   SAFETY_MODEL = CarParams.SafetyModel.volkswagen
   SAFETY_PARAM = VolkswagenSafetyFlags.LONG_CONTROL

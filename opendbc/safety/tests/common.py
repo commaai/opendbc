@@ -26,6 +26,9 @@ MAX_SPEED_DELTA = 2.0  # m/s
 
 MessageFunction = Callable[[float], libsafety_py.CANPacket]
 
+# for the safety modes and params that only debug builds (ALLOW_DEBUG) have
+debug_only = unittest.skipIf(libsafety_py.RELEASE, "not in the release build")
+
 
 def sign_of(a):
   return 1 if a > 0 else -1

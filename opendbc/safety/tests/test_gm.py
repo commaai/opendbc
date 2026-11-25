@@ -213,6 +213,7 @@ class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
   pass
 
 
+@common.debug_only
 class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase):
   TX_MSGS = [[0x180, 0], [0x315, 0], [0x2CB, 0], [0x370, 0],  # pt bus
              [0x184, 2]]  # camera bus

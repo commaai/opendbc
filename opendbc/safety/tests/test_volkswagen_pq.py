@@ -12,6 +12,7 @@ MSG_ACC_GRA_ANZEIGE = 0x56A   # TX by OP, ACC HUD
 MSG_LDW_1 = 0x5BE             # TX by OP, Lane line recognition and text alerts
 
 
+@common.debug_only
 class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   DBC = "vw_pq"
 

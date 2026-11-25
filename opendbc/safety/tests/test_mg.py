@@ -6,6 +6,7 @@ import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
 
 
+@common.debug_only
 class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   DBC = "mg"

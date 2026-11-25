@@ -7,6 +7,9 @@ from pathlib import Path
 from typing import Any
 
 from cffi import FFI
+from cffi.commontypes import COMMON_TYPES
+from pycparser import CParser, c_ast
+from pycparser.c_generator import CGenerator
 
 from opendbc.safety import LEN_TO_DLC
 
@@ -22,29 +25,37 @@ def single_precision_flags() -> list[str]:
   return [flag] if result.returncode == 0 else []
 
 
-def _build_libsafety(release: bool = False) -> str:
-  """Compile libsafety.so to a temp file and return its path."""
-  root = str(Path(libsafety_dir).parents[3])
-  safety_c = os.path.join(libsafety_dir, "safety.c")
+# the tests run against the debug build, or the release build with SAFETY_RELEASE=1
+RELEASE = os.environ.get("SAFETY_RELEASE") == "1"
+root = str(Path(libsafety_dir).parents[3])
+safety_c = os.path.join(libsafety_dir, "safety.c")
 
+
+def defines(release: bool) -> list[str]:
+  return [] if release else ['-DALLOW_DEBUG']
+
+
+def _build_libsafety(release: bool = RELEASE) -> str:
+  """Compile libsafety.so to a temp file and return its path."""
   cflags = [
     '-Wall', '-Wextra', '-Werror', '-nostdlib', '-fno-builtin',
     '-std=gnu11', '-Wfatal-errors', '-Wno-pointer-to-int-cast',
-    '-g', '-O0', '-fno-omit-frame-pointer', *single_precision_flags(),
+    '-g', '-O0', '-fno-omit-frame-pointer', *single_precision_flags(), *defines(release),
   ]
   # Coverage must exclude the branches inserted by UBSan.
   if os.environ.get("SAFETY_COVERAGE") == "1":
-    ldflags = ['-fprofile-arcs', '-ftest-coverage'] if not release else []
+    ldflags = ['-fprofile-arcs', '-ftest-coverage']
   else:
     ldflags = ['-fsanitize=undefined', '-fno-sanitize-recover=undefined']
     # comma devices have no UBSan runtime, trap instead
     if os.environ.get("SAFETY_UBSAN_TRAP") == "1":
       ldflags.append('-fsanitize-trap=undefined')
   cflags += ldflags
-  if not release:
-    cflags += ['-DALLOW_DEBUG']
 
-  fd, safety_os = tempfile.mkstemp(suffix='.os', dir=libsafety_dir)
+  # each build's coverage data goes to its own directory
+  obj_dir = os.path.join(libsafety_dir, "release" if release else "debug")
+  os.makedirs(obj_dir, exist_ok=True)
+  fd, safety_os = tempfile.mkstemp(suffix='.os', dir=obj_dir)
   os.close(fd)
   fd, libsafety_so = tempfile.mkstemp(suffix='.so')
   os.close(fd)
@@ -54,28 +65,43 @@ def _build_libsafety(release: bool = False) -> str:
   return libsafety_so
 
 
-def cdef_from_files(*paths: Path) -> str:
-  source = "\n".join(path.read_text() for path in paths)
-  source = re.sub(r"//[^\n]*|/\*.*?\*/", "", source, flags=re.DOTALL)
-  source = re.sub(r"__attribute__\(\(.*\)\)", "", source)
+def make_ffi(release: bool) -> FFI:
+  """Declare the types, functions and variables that the tests use, as the build preprocesses them."""
+  # pycparser can't parse attributes, cffi packs CANPacket_t instead
+  source = subprocess.check_output(['cc', '-E', '-std=gnu11', *defines(release), '-D__attribute__(x)=', '-I', root, safety_c], text=True)
 
-  # Keep integer constants, type declarations, and function signatures, including definitions.
-  constants = re.findall(r"^#define \w+ \d+[UuLl]*[ \t]*$", source, re.MULTILINE)
-  types = re.findall(r"^(?:typedef|struct|enum)\b(?:[^;{]|\{[^}]*\})+;", source, re.MULTILINE)
-  functions = re.findall(r"^((?!typedef\b|static\b)\w[\w *]*\b\w+\([^;{}]*\))\s*[;{]", source, re.MULTILINE)
-  return "\n".join([*constants, *types, *(f"{signature};" for signature in dict.fromkeys(functions))])
+  # Parse only the interface, pycparser can't parse the system headers and the safety modes take long.
+  # The standard types from the system headers are declared instead.
+  safety_dir = os.path.join(root, "opendbc", "safety")
+  can_h = os.path.join(safety_dir, "can.h")
+  interface = {safety_c, can_h, os.path.join(safety_dir, "declarations.h"), os.path.join(safety_dir, "ignition.h")}
+  lines, keep = [], True
+  for line in source.splitlines():
+    if marker := re.match(r'# \d+ "(.*)"', line):
+      keep = marker.group(1) in interface
+    lines.append(line if keep or marker else "")
+  ast = CParser().parse("".join(f"typedef int {t};\n" for t in COMMON_TYPES if t.isidentifier()) + "\n".join(lines))
+
+  decls: dict[bool, dict[str | int, c_ast.Node]] = {True: {}, False: {}}  # by whether they're in can.h
+  for node in ast.ext:
+    if isinstance(node, c_ast.FuncDef):
+      node = node.decl
+    if isinstance(node, (c_ast.Decl, c_ast.Typedef)) and node.coord.file in interface and "static" not in node.storage:
+      if isinstance(node, c_ast.Decl) and node.name and not isinstance(node.type, c_ast.FuncDecl):
+        node.storage, node.init = ["extern"], None
+      decls[node.coord.file == can_h].setdefault(node.name or id(node), node)  # declared in a header and defined in safety.c
+
+  ffi = FFI()
+  gen = CGenerator()
+  for packed, nodes in decls.items():
+    ffi.cdef("".join(f"{gen.visit(n)};\n" for n in nodes.values()), packed=packed)
+  return ffi
 
 
-ffi = FFI()
-safety_dir = Path(libsafety_dir).parents[1]
-ffi.cdef(cdef_from_files(safety_dir / "can.h"), packed=True)
-# one cdef, so a function both declared in a header and defined in safety.c is only declared once
-ffi.cdef(cdef_from_files(safety_dir / "declarations.h", safety_dir / "ignition.h", Path(libsafety_dir) / "safety.c"))
+ffi = make_ffi(RELEASE)
 
 # This function is generated by mutation.py rather than defined in the sources above.
 ffi.cdef("void mutation_set_active_mutant(int id);")
-
-ffi.cdef("extern SafetyCopy safety_a; extern SafetyCopy safety_b; extern bool safety_redundancy_fault; extern uint32_t ignition_can_cnt;")
 
 # cffi builds these from the C sources at load time, so there is nothing to check statically
 LibSafety = Any

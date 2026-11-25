@@ -21,6 +21,7 @@ def safety_max_can(max_angle_float, can_offset=0):
   return int(max_angle_float * 10 + 1.) + can_offset
 
 
+@common.debug_only
 class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   DBC = "byd_atto3"
   SAFETY_MODEL = CarParams.SafetyModel.byd
