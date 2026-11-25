@@ -200,6 +200,14 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+  // only one button at a time
+  if (msg->addr == MSG_GRA_NEU) {
+    // Signal: GRA_Neu.GRA_Abbrechen ... GRA_Zeitluecke: the buttons are bits 9-13, 16-17 and 24-27
+    if (safety_multiple_bits_set(GET_BYTES_LE(msg, 0, 4) & 0xF033E00U)) {
+      tx = false;
+    }
+  }
+
   return tx;
 }
 

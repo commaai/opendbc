@@ -4,7 +4,7 @@ from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 
 
-class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest):
+class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSafetyTest, common.CruiseButtonsSafetyTest):
   DBC = "chrysler_cusw"
   SAFETY_MODEL = CarParams.SafetyModel.chryslerCusw
 
@@ -18,8 +18,10 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
   MAX_RT_DELTA = 150
   MAX_TORQUE_ERROR = 80
 
-  def _button_msg(self, cancel=False, resume=False):
-    values = {"ACC_Cancel": cancel, "ACC_Resume": resume}
+  OTHER_BUTTONS = ("ACC_Distance_Dec", "ACC_Accel", "ACC_Decel", "Cruise_OnOff", "ACC_OnOff", "ACC_Distance_Inc")
+
+  def _button_msg(self, cancel=False, resume=False, **signals):
+    values = {"ACC_Cancel": cancel, "ACC_Resume": resume, **signals}
     return self.packer.make_can_msg_safety("CRUISE_BUTTONS", 0, values)
 
   def _pcm_status_msg(self, enable):
@@ -56,7 +58,7 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
       self.assertEqual(controls_allowed, self._tx(self._button_msg(resume=True)))
 
       # can always cancel
-      self.assertTrue(self._tx(self._button_msg(cancel=True)))
+      self.assertTrue(self._tx(self._button_msg(cancel=True, COUNTER=1)))
 
 
 if __name__ == "__main__":

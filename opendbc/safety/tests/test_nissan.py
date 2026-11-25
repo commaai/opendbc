@@ -6,7 +6,7 @@ from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
 
 
-class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
+class TestNissanSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest):
 
   DBC = "nissan_x_trail_2017_generated"
   SAFETY_MODEL = CarParams.SafetyModel.nissan
@@ -51,29 +51,6 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     values = {"GAS_PEDAL": gas}
     return self.packer.make_can_msg_safety("GAS_PEDAL", self.EPS_BUS, values)
 
-  def _acc_button_cmd(self, cancel=0, propilot=0, flw_dist=0, _set=0, res=0):
-    no_button = not any([cancel, propilot, flw_dist, _set, res])
-    values = {"CANCEL_BUTTON": cancel, "PROPILOT_BUTTON": propilot,
-              "FOLLOW_DISTANCE_BUTTON": flw_dist, "SET_BUTTON": _set,
-              "RES_BUTTON": res, "NO_BUTTON_PRESSED": no_button}
-    return self.packer.make_can_msg_safety("CRUISE_THROTTLE", 2, values)
-
-  def test_acc_buttons(self):
-    btns = [
-      ("cancel", True),
-      ("propilot", False),
-      ("flw_dist", False),
-      ("_set", False),
-      ("res", False),
-      (None, False),
-    ]
-    for controls_allowed in (True, False):
-      for btn, should_tx in btns:
-        self.safety.set_controls_allowed(controls_allowed)
-        args = {} if btn is None else {btn: 1}
-        tx = self._tx(self._acc_button_cmd(**args))
-        self.assertEqual(tx, should_tx)
-
   def test_lkas_max_torque(self):
     # the EPS torque limit the LKAS msg sets is at most what openpilot sends, which the driver can easily overpower
     for enabled in (True, False):
@@ -84,6 +61,34 @@ class TestNissanSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
         self.assertEqual(should_tx, self._tx(self.packer.make_can_msg_safety("LKAS", 0, values)), raw)
 
 
+class TestNissanSafety(TestNissanSafetyBase, common.CruiseButtonsSafetyTest):
+  ALLOWED_BUTTONS = ("cancel",)
+  OTHER_BUTTONS = ("propilot", "flw_dist", "_set", "resume")
+
+  def _button_msg(self, cancel=0, propilot=0, flw_dist=0, _set=0, resume=0):
+    no_button = not any([cancel, propilot, flw_dist, _set, resume])
+    values = {"CANCEL_BUTTON": cancel, "PROPILOT_BUTTON": propilot,
+              "FOLLOW_DISTANCE_BUTTON": flw_dist, "SET_BUTTON": _set,
+              "RES_BUTTON": resume, "NO_BUTTON_PRESSED": no_button}
+    return self.packer.make_can_msg_safety("CRUISE_THROTTLE", 2, values)
+
+  def test_acc_buttons(self):
+    btns = [
+      ("cancel", True),
+      ("propilot", False),
+      ("flw_dist", False),
+      ("_set", False),
+      ("resume", False),
+      (None, False),
+    ]
+    for controls_allowed in (True, False):
+      for btn, should_tx in btns:
+        self.safety.set_controls_allowed(controls_allowed)
+        args = {} if btn is None else {btn: 1}
+        tx = self._tx(self._button_msg(**args))
+        self.assertEqual(tx, should_tx)
+
+
 class TestNissanSafetyAltEpsBus(TestNissanSafety):
   """Altima uses different buses"""
   SAFETY_PARAM = NissanSafetyFlags.ALT_EPS_BUS
@@ -91,7 +96,8 @@ class TestNissanSafetyAltEpsBus(TestNissanSafety):
   EPS_BUS = 1
   CRUISE_BUS = 1
 
-class TestNissanLeafSafety(TestNissanSafety):
+# TODO: leaf should use its own safety param
+class TestNissanLeafSafety(TestNissanSafetyBase):
 
   DBC = "nissan_leaf_2018_generated"
 
@@ -102,10 +108,6 @@ class TestNissanLeafSafety(TestNissanSafety):
   def _user_gas_msg(self, gas):
     values = {"GAS_PEDAL": gas}
     return self.packer.make_can_msg_safety("CRUISE_THROTTLE", 0, values)
-
-  # TODO: leaf should use its own safety param
-  def test_acc_buttons(self):
-    pass
 
 
 if __name__ == "__main__":

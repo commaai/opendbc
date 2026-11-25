@@ -21,7 +21,7 @@ def safety_max_can(max_angle_float, can_offset=0):
   return int(max_angle_float * 10 + 1.) + can_offset
 
 
-class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
+class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.CruiseButtonsSafetyTest):
   DBC = "byd_atto3"
   SAFETY_MODEL = CarParams.SafetyModel.byd
 
@@ -74,6 +74,14 @@ class TestBydSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
   def _user_gas_msg(self, gas):
     values = {"RAW_THROTTLE": int(gas * 100)}
     return self.packer.make_can_msg_safety("DRIVE_STATE", self.MAIN_BUS, values)
+
+  # ACC_ON_BTN cancels stock cruise
+  ALLOWED_BUTTONS = ("cancel",)
+  OTHER_BUTTONS = ("resume", "SET_BTN", "LKAS_ON_BTN", "DEC_DISTANCE_BTN", "INC_DISTANCE_BTN")
+
+  def _button_msg(self, cancel=False, resume=False, **buttons):
+    values = {"ACC_ON_BTN": cancel, "RES_BTN": resume, "SET_ME_1_1": 1, "SET_ME_1_2": 1, **buttons}
+    return self.packer.make_can_msg_safety("PCM_BUTTONS", self.MAIN_BUS, values)
 
   def test_cruise_states(self):
     for state in range(8):

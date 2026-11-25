@@ -6,7 +6,7 @@ import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import make_msg
 
 
-class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.CruiseButtonsSafetyTest):
 
   DBC = "mazda_2017"
   SAFETY_MODEL = CarParams.SafetyModel.mazda
@@ -52,8 +52,11 @@ class TestMazdaSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTes
     values = {"CRZ_ACTIVE": enable}
     return self.packer.make_can_msg_safety("CRZ_CTRL", 0, values)
 
-  def _button_msg(self, resume=False, cancel=False):
+  OTHER_BUTTONS = ("SET_P", "SET_M", "DISTANCE_MORE", "DISTANCE_LESS", "MODE_X", "MODE_Y")
+
+  def _button_msg(self, resume=False, cancel=False, **buttons):
     values = {
+      **buttons,
       "CAN_OFF": cancel,
       "CAN_OFF_INV": (cancel + 1) % 2,
       "RES": resume,

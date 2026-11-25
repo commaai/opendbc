@@ -75,8 +75,8 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     return self.packer.make_can_msg_safety("HCA_01", 0, values)
 
   # Cruise control buttons
-  def _gra_acc_01_msg(self, cancel=0, resume=0, _set=0, bus=2):
-    values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume}
+  def _button_msg(self, cancel=0, resume=0, _set=0, bus=2, **buttons):
+    values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume, **buttons}
     return self.packer.make_can_msg_safety("GRA_ACC_01", bus, values)
 
   # Acceleration request to drivetrain coordinator
@@ -93,7 +93,7 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False, main_switch=True))
     self.safety.set_controls_allowed(1)
-    self._rx(self._gra_acc_01_msg(cancel=True, bus=0))
+    self._rx(self._button_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
   # Verify brake_pressed is true if either the switch or pressure threshold signals are true
@@ -109,20 +109,21 @@ class TestVolkswagenMqbSafetyBase(common.CarSafetyTest, common.DriverTorqueSteer
                        f"expected {brake_pressed=} with {motor_14_signal=} and {esp_05_signal=}")
 
 
-class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
+class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase, common.CruiseButtonsSafetyTest):
   SAFETY_MODEL = CarParams.SafetyModel.volkswagen
+  OTHER_BUTTONS = ("_set", "GRA_Tip_Hoch", "GRA_Tip_Runter", "GRA_Verstellung_Zeitluecke")
 
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02]}
 
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
-    self.assertTrue(self._tx(self._gra_acc_01_msg(cancel=1)))
-    self.assertFalse(self._tx(self._gra_acc_01_msg(resume=1)))
-    self.assertFalse(self._tx(self._gra_acc_01_msg(_set=1)))
+    self.assertTrue(self._tx(self._button_msg(cancel=1)))
+    self.assertFalse(self._tx(self._button_msg(resume=1)))
+    self.assertFalse(self._tx(self._button_msg(_set=1)))
     # do not block resume if we are engaged already
     self.safety.set_controls_allowed(1)
-    self.assertTrue(self._tx(self._gra_acc_01_msg(resume=1)))
+    self.assertTrue(self._tx(self._button_msg(resume=1)))
 
   def test_cruise_states(self):
     for state in range(8):
@@ -155,12 +156,12 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
       # ACC main switch must be on, engage on falling edge
       self.safety.set_controls_allowed(0)
       self._rx(self._tsk_status_msg(False, main_switch=False))
-      self._rx(self._gra_acc_01_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
+      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} with main switch off")
       self._rx(self._tsk_status_msg(False, main_switch=True))
-      self._rx(self._gra_acc_01_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
+      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} rising edge")
-      self._rx(self._gra_acc_01_msg(bus=0))
+      self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 
   def test_main_switch(self):

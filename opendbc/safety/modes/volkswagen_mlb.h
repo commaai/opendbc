@@ -111,6 +111,14 @@ static bool volkswagen_mlb_tx_hook(const CANPacket_t *msg) {
     }
   }
 
+  // only one button at a time
+  if (msg->addr == MSG_LS_01) {
+    // Signal: LS_01.LS_Abbrechen ... MFL_M_Taste: the buttons are bits 13, 16-23 and 31
+    if (safety_multiple_bits_set(GET_BYTES_LE(msg, 0, 4) & 0x80FF2000U)) {
+      tx = false;
+    }
+  }
+
   return tx;
 }
 

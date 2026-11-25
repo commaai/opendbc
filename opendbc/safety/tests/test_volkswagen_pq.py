@@ -72,8 +72,8 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
     return self.packer.make_can_msg_safety("Motor_3", 0, values)
 
   # Cruise control buttons (GRA_Neu)
-  def _button_msg(self, _set=False, resume=False, cancel=False, bus=2):
-    values = {"GRA_Neu_Setzen": _set, "GRA_Recall": resume, "GRA_Abbrechen": cancel}
+  def _button_msg(self, _set=False, resume=False, cancel=False, bus=2, **buttons):
+    values = {"GRA_Neu_Setzen": _set, "GRA_Recall": resume, "GRA_Abbrechen": cancel, **buttons}
     return self.packer.make_can_msg_safety("GRA_Neu", bus, values)
 
   def test_cancel_button(self):
@@ -84,9 +84,10 @@ class TestVolkswagenPqSafetyBase(common.CarSafetyTest, common.DriverTorqueSteeri
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
 
-class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
+class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase, common.CruiseButtonsSafetyTest):
   # Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   SAFETY_MODEL = CarParams.SafetyModel.volkswagenPq
+  OTHER_BUTTONS = ("_set", "GRA_Down_kurz", "GRA_Up_kurz", "GRA_Down_lang", "GRA_Up_lang", "GRA_Tip_Down", "GRA_Tip_Up", "GRA_Zeitluecke")
 
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_GRA_NEU, 0], [MSG_GRA_NEU, 2], [MSG_LDW_1, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1]}
