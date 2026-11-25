@@ -30,8 +30,8 @@ def create_lka_hud_2_control(packer, bus, lat_active):
 
 
 def create_lka_hud_3_control(packer, bus, lat_active):
-  # NEW_SIGNAL_1 omitted -- may be haptic steering wheel feedback level, probably not consequential to steering control
   values = {
+    "HANDS_OFF_WHEEL": 0,
     "LKA_ACTIVE": lat_active,
   }
 
