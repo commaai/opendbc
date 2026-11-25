@@ -4,6 +4,7 @@ import unittest
 import numpy as np
 
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
+from opendbc.car.leapmotor import leapmotorcan
 from opendbc.car.leapmotor.carcontroller import get_safety_CP
 from opendbc.car.leapmotor.values import CarControllerParams, LeapmotorSafetyFlags
 from opendbc.car.structs import CarParams
@@ -14,6 +15,9 @@ from opendbc.safety.tests.common import CANPackerSafety, away_round, round_speed
 
 ADAS_LKA = 0x83
 POWERTRAIN_STATE = 0xB7
+# ADAS_LKA.LCC_RAMP bounds while steering, as in leapmotor.h
+LCC_RAMP_IDLE = 0x7801
+LCC_RAMP_DEEPEST = 0x4A5D
 
 
 def round_angle(apply_angle, can_offset=0):
@@ -143,7 +147,7 @@ class TestLeapmotorSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
     self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
-    values = {"STEER_ANGLE_REQ": angle, "LCC_STEERING_ACTIVE_COPY": enabled, "ACC_ACCEL_REQ": 0}
+    values = {"STEER_ANGLE_REQ": angle, "LCC_STEERING_ACTIVE_COPY": enabled, "ACC_ACCEL_REQ": 0, "LCC_RAMP": LCC_RAMP_IDLE}
     if increment_timer:
       self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
       self.__class__.cnt_angle_cmd += 1
@@ -250,6 +254,22 @@ class TestLeapmotorSafety(common.CarSafetyTest, common.AngleSteeringSafetyTest):
       bad = bytearray.fromhex(frames[-1])
       bad[0] ^= 0x01
       self.assertFalse(self._rx(libsafety_py.make_CANPacket(addr, self.MAIN_BUS, bytes(bad))), hex(addr))
+
+  def test_lcc_ramp_limit(self):
+    # while steering, the EPS effort word must be between idle and the deepest stock value; otherwise it is free
+    self.safety.set_controls_allowed(True)
+    self._reset_speed_measurement(10)
+    for lka_active in (True, False):
+      for ramp in (LCC_RAMP_IDLE + 1, LCC_RAMP_IDLE, LCC_RAMP_DEEPEST, LCC_RAMP_DEEPEST - 1, 0, 0xFFFF):
+        values = {"STEER_ANGLE_REQ": 0, "LCC_STEERING_ACTIVE_COPY": lka_active, "ACC_ACCEL_REQ": 0, "LCC_RAMP": ramp}
+        self.safety.set_desired_angle_last(0)
+        msg = self.packer.make_can_msg_safety("ADAS_LKA", self.MAIN_BUS, values)
+        allowed = not lka_active or LCC_RAMP_DEEPEST <= ramp <= LCC_RAMP_IDLE
+        self.assertEqual(allowed, self._tx(msg), (lka_active, hex(ramp)))
+
+  def test_lcc_ramp_limit_matches_car_code(self):
+    self.assertEqual(LCC_RAMP_IDLE, leapmotorcan.LCC_RAMP_IDLE)
+    self.assertEqual(LCC_RAMP_DEEPEST, leapmotorcan.LCC_RAMP_IDLE - leapmotorcan.LCC_RAMP_STEP * leapmotorcan.LCC_RAMP_STEPS_MAX)
 
   def test_accel_request_unchecked_without_longitudinal(self):
     # only with the longitudinal flag is the acceleration request checked: an unknown hard request is then blocked
