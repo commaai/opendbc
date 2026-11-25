@@ -52,7 +52,7 @@ BO_ 254 ABS_2: 8 ABS
 
 BO_ 257 ABS_6: 8 ABS
  SG_ VEHICLE_SPEED : 0|12@0+ (0.017,0) [0|4095] "" XXX
- SG_ MAYBE_ACC_BRAKE : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_BRAKE : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_PRESSURE_1 : 20|11@0+ (1,0) [0|2047] "" XXX
  SG_ NEW_SIGNAL_1 : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
@@ -180,7 +180,6 @@ CM_ SG_ 252 ACCEL_PEDAL_COMBO "driver pedal and ACC demand combined";
 CM_ SG_ 254 LONG_ACCEL "scale TBD";
 CM_ SG_ 254 LATERAL_ACCEL "scale TBD";
 CM_ SG_ 254 YAW_RATE "scale estimated";
-CM_ SG_ 257 MAYBE_ACC_BRAKE "may correlate with ACC-actuated braking";
 CM_ SG_ 278 FORWARD_1 "probably per-axle";
 CM_ SG_ 278 REVERSE_1 "probably per-axle";
 CM_ SG_ 278 FORWARD_2 "probably per-axle";

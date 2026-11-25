@@ -343,12 +343,11 @@ typedef struct {
   bool volkswagen_brake_pedal_switch;
   bool volkswagen_brake_pressure_detected;
 
-  // fca_atlantis torque winddown: the last LKA_COMMAND_2 torque allowed while engaged and when, and the last allowed
-  // since (0 when there's no winddown)
-  int fca_atlantis_engaged_torque;
-  uint32_t fca_atlantis_ts_engaged;
-  int fca_atlantis_winddown_torque;
-  bool fca_atlantis_in_winddown;  // the last allowed LKA_COMMAND_2 was a winddown frame
+  // fca_atlantis torque winddown
+  int fca_atlantis_engaged_torque;  // last LKA_COMMAND_2 torque allowed while engaged (0 after a violation)
+  uint32_t fca_atlantis_ts_engaged;  // time of that frame
+  int fca_atlantis_winddown_torque;  // torque the next winddown frame may not exceed in magnitude; 0 for no winddown
+  bool fca_atlantis_in_winddown;  // the last LKA_COMMAND_2 was an allowed winddown frame
   // fca_atlantis LKA_COMMAND: one 1/4 scale copy of the last LKA_COMMAND_2 may be sent
   bool fca_atlantis_lka_copy_pending;
   int fca_atlantis_lka_copy_torque;

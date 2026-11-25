@@ -47,8 +47,8 @@ class CarController(CarControllerBase):
         self.torque_cut = apply_torque - new_torque
       elif CS.lka_status == 2:
         # Stock LKA never cuts torque in one step: it ramps to zero, then holds LKA_ACTIVE at zero torque for a few
-        # frames before releasing. An abrupt release with torque applied is suspected of latching EPS LKA_FAULT.
-        # Panda safety allows this winddown after a disengage, ramping down at up to STEER_DELTA_DOWN per frame.
+        # frames before releasing. An abrupt release with torque applied is observed to latch EPS LKA_FAULT.
+        # Panda safety allows this winddown after a disengage, if torque falls by at least STEER_DELTA_DOWN per frame.
         torque_mag = max(abs(self.apply_torque_last) - self.CCP.STEER_DELTA_DOWN, 0)
         apply_torque = torque_mag if self.apply_torque_last > 0 else -torque_mag
       else:

@@ -15,8 +15,8 @@
 #define FCA_ATLANTIS_ACC_2           0x22AU
 #define FCA_ATLANTIS_ACC_BUTTON      0x2FAU
 
-// Torque winddown after controls are lost (e.g. brake press). Cutting torque to zero in one frame is suspected of
-// latching EPS LKA_FAULT, and stock LKA always ramps down. After a disengage, allow torque with LKA_ACTIVE set that
+// Torque winddown after controls are lost (e.g. brake press). Cutting torque to zero in one frame is observed to
+// latch EPS LKA_FAULT, and stock LKA always ramps down. After a disengage, allow torque with LKA_ACTIVE set that
 // never grows in magnitude or changes sign, and stays under a limit that falls at FCA_ATLANTIS_MAX_RATE_DOWN per
 // frame from the last torque allowed while engaged. The limit depends only on time, so it ends by itself.
 #define FCA_ATLANTIS_MAX_RATE_DOWN 12
@@ -175,10 +175,10 @@ static bool fca_atlantis_tx_hook(const CANPacket_t *msg) {
     }
   }
 
-  // LKA_COMMAND is a 1/4 scale copy of LKA_COMMAND_2. The EPS is suspected to listen only to LKA_COMMAND_2: it
-  // engaged and steered with LKA_COMMAND_2 alone, and stock sends LKA_COMMAND one frame later as a rounded copy
-  // of LKA_COMMAND_2 / 4. Rather than running the shared torque rate-limit state twice per frame, allow one
-  // rounded copy (either direction) of each LKA_COMMAND_2, which openpilot sends first each frame.
+  // LKA_COMMAND is a 1/4 scale copy of LKA_COMMAND_2. The EPS is suspected to listen only to LKA_COMMAND_2:
+  // stock sends LKA_COMMAND one frame later as a rounded copy of LKA_COMMAND_2 / 4. Rather than running the shared
+  // torque rate-limit state twice per frame, allow one rounded copy (either direction) of each LKA_COMMAND_2, which
+  // openpilot sends first each frame.
   if (msg->addr == FCA_ATLANTIS_LKA_COMMAND) {
     // Signal: LKA_COMMAND.LKA_TORQUE
     int desired_torque = from_offset(GET_BYTES_BE(msg, 0, 2) >> 5, 1024);

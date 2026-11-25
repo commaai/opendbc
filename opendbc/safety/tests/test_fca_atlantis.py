@@ -20,6 +20,9 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 8
 
+  FRAME_US = 10000  # LKA_COMMAND_2 frames are 10 ms apart, as openpilot sends them
+  WINDDOWN_SLACK_FRAMES = 5  # frames of delay tolerated before torque must fall
+
   TX_MSGS = [[0x117, 0], [0x1F6, 0], [0x547, 0], [0x5A2, 0], [0x2FA, 2]]
   STANDSTILL_THRESHOLD = 0
   FWD_BLACKLISTED_ADDRS = {2: [0x117, 0x1F6, 0x547, 0x5A2]}
@@ -56,6 +59,10 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
   def _torque_cmd_1_msg(self, torque, steer_req=1):
     values = {"LKA_TORQUE": torque, "LKA_ACTIVE": steer_req}
     return self.packer.make_can_msg_safety("LKA_COMMAND", 0, values)
+
+  def _tx_frame(self, t, torque, steer_req=1):
+    self.safety.set_timer(t)
+    return self._tx(self._torque_cmd_msg(torque, steer_req))
 
   TORQUES = (0, 5, 6, 12, 22, 10, 0, -2, -6, -12, -22)
 
@@ -195,13 +202,6 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
       self.assertTrue(self._tx(self._torque_cmd_msg(sign * (108 + self.MAX_RATE_UP))))
       self.assertFalse(self._tx(self._torque_cmd_msg(sign * (120 + self.MAX_RATE_UP + 1))))
 
-  # Known bugs. Frames are 10 ms apart, as openpilot sends them.
-  FRAME_US = 10000
-
-  def _tx_frame(self, t, torque, steer_req=1):
-    self.safety.set_timer(t)
-    return self._tx(self._torque_cmd_msg(torque, steer_req))
-
   def test_reengage_after_blocked_frame(self):
     # A frame blocked after the brake press (one openpilot sent before it saw the brake) must not leave the rate
     # limits in a state where re-engaging mid-winddown, still above MAX_RT_DELTA, is blocked indefinitely.
@@ -231,8 +231,6 @@ class TestFcaAtlantis_Safety(common.CarSafetyTest, common.DriverTorqueSteeringSa
     t = 5_000_000
     self.assertFalse(self._tx_frame(t, 800))
     self.assertTrue(self._tx_frame(t + self.FRAME_US, self.MAX_RATE_UP))
-
-  WINDDOWN_SLACK_FRAMES = 5  # frames of delay tolerated before torque must fall
 
   def test_winddown_ramps_down(self):
     # After a disengage, torque must keep falling at MAX_RATE_DOWN per frame, not hold
