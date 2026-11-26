@@ -25,6 +25,20 @@ def compute_gb_honda_nidec(accel, speed):
   return np.clip(gb, 0.0, 1.0), np.clip(-gb, 0.0, 1.0)
 
 
+def apply_bosch_creep_compensation(accel: float, v_ego: float, standstill: bool) -> float:
+  # The car's ACC does not cancel powertrain creep at walking pace: below ~1 m/s it largely ignores
+  # requests weaker than about -0.75 m/s^2, even with BRAKE_REQUEST set, but tracks firmer ones ~1:1.
+  # Without help the car holds ~1 mph and never drops under the 0.3 m/s stopping threshold that
+  # would let us send STANDSTILL. Nidec has creep_brake for the same reason.
+  if standstill and accel > 0.:
+    return accel  # launching: the car is already held, don't brake against the start request
+  # firm up the request slightly, and never send one weak enough to fall into the dead band
+  # (a constant offset over-brakes requests that are already firm; a floor alone sits on the edge)
+  compensated = min(accel - 0.3, -1.0)
+  weight = np.interp(v_ego, [1., 3.], [1., 0.]) * np.interp(accel, [0.1, 0.3], [1., 0.])
+  return float(accel + weight * (compensated - accel))
+
+
 def compute_gas_brake(accel, speed, CP):
   if CP.flags & HondaFlags.BOSCH:
     return compute_gb_honda_bosch(accel, speed)
@@ -195,6 +209,8 @@ class CarController(CarControllerBase):
         ts = self.frame * DT_CTRL
 
         if self.CP.flags & HondaFlags.BOSCH:
+          if CC.longActive:
+            accel = apply_bosch_creep_compensation(accel, CS.out.vEgo, CS.out.standstill)
           self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
           self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
