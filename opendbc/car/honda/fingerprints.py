@@ -11,6 +11,27 @@ Ecu = CarParams.Ecu
 
 
 FW_VERSIONS = {
+  CAR.HONDA_NVAN_JJ1: {
+    # EPS
+    (Ecu.eps, 0x18da30f1, None): [
+      b'39990-TXA-N020\x00\x00',
+    ],
+
+    # Forward Camera
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'36161-TXA-J050\x00\x00',
+    ],
+
+    # SRS
+    (Ecu.srs, 0x18da53f1, None): [
+      b'77959-TXA-J420\x00\x00',
+    ],
+
+    # Forward Radar
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36802-TXA-J090\x00\x00',
+    ],
+},
   CAR.HONDA_NBOX_2G: {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-TTA-J030\x00\x00',
