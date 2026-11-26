@@ -2,12 +2,25 @@ import math
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_hysteresis, structs
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags, CAR
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
+
+# Stock's ACC target speed runs about this far ahead of the current speed at the requested accel
+ACC_TARGET_TIME = 2.5  # s
+
+
+def get_acc_target_kph(v_ego: float, accel: float, set_speed: float) -> float:
+  # Stock sends a near-term target, not the set speed. Sending far above the current speed makes the TCM
+  # hold low gears to high rpm (seen up to 5300 rpm) while the PCM's cruise mode (CcMde_D_Actl) is Keeping_Speed
+  v_target = (v_ego + ACC_TARGET_TIME * accel) * CV.MS_TO_KPH
+  v_max = min(set_speed * CV.MS_TO_KPH, V_CRUISE_MAX) if set_speed > 0. else V_CRUISE_MAX
+  return float(np.clip(v_target, 0., v_max))
+
 
 def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
   diff = 0.1
@@ -149,8 +162,8 @@ class CarController(CarControllerBase):
         gas = CarControllerParams.INACTIVE_GAS
 
       stopping = CC.actuators.longControlState == LongCtrlState.stopping
-      # TODO: look into using the actuators packet to send the desired speed
-      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, accel, stopping, self.brake_request, v_ego_kph=V_CRUISE_MAX))
+      target_kph = get_acc_target_kph(CS.out.vEgo, actuators.accel, hud_control.setSpeed)
+      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, accel, stopping, self.brake_request, v_ego_kph=target_kph))
 
       self.accel = accel
       self.gas = gas
