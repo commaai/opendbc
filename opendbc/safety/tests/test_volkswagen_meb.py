@@ -29,8 +29,6 @@ MSG_LDW_02     = 0x397
 
 
 class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteeringSafetyTest):
-  STANDSTILL_THRESHOLD = 0
-
   MAX_CURVATURE = 29105
   MAX_CURVATURE_TEST = 0.195
   CURVATURE_TO_CAN = 149253.7313
@@ -173,45 +171,15 @@ class TestVolkswagenMebSafetyBase(common.CarSafetyTest, common.CurvatureSteering
     self.assertEqual(0, self.safety.get_curvature_meas_max())
     self.assertEqual(0, self.safety.get_curvature_meas_min())
 
-  def test_brake_signal(self):
-    self._rx(self._user_brake_msg(False))
-    self.assertFalse(self.safety.get_brake_pressed_prev())
-    self._rx(self._user_brake_msg(True))
-    self.assertTrue(self.safety.get_brake_pressed_prev())
-
   def test_torque_driver_measurements(self):
     for t in (0, 100, -100, 250, -250):
       self._rx(self._torque_driver_msg(t))
-
-  def test_rx_hook(self):
-    # checksum and counter checks
-    for name in ("LH_EPS_03", "Motor_14", "GRA_ACC_01", "QFK_01", "ESP_21", "Motor_51", "ESC_51"):
-      with self.subTest(msg=name):
-        # an expected counter sequence is always accepted, and clears the wrong counter count
-        for _ in range(common.MAX_WRONG_COUNTERS + 1):
-          self.assertTrue(self._rx(self.packer.make_can_msg_safety(name, 0, {})))
-
-        # mess with the checksum to make it fail, it's the first byte of every MEB message
-        msg = self.packer.make_can_msg_safety(name, 0, {})
-        msg[0].data[0] ^= 0xFF
-        self.assertFalse(self._rx(msg))
-
-        # a stuck counter fails as well, its checksum is still correct
-        msg[0].data[0] ^= 0xFF
-        for i in range(common.MAX_WRONG_COUNTERS):
-          should_rx = i < common.MAX_WRONG_COUNTERS - 1
-          self.assertEqual(should_rx, self._rx(msg))
 
   def test_main_switch_off_disables_controls(self):
     for tsk_status in range(8):
       self.safety.set_controls_allowed(True)
       self._rx(self.packer.make_can_msg_safety("Motor_51", 0, {"TSK_Status": tsk_status}))
       self.assertEqual(tsk_status in (2, 3, 4, 5), self.safety.get_controls_allowed())
-
-  def test_cancel_button_rising_edge(self):
-    self.safety.set_controls_allowed(True)
-    self._rx(self._button_msg(cancel=1, bus=0))
-    self.assertFalse(self.safety.get_controls_allowed())
 
   def test_rx_hook_speed_mismatch(self):
     for speed in np.arange(0, 40, 0.5):
@@ -293,6 +261,17 @@ class TestVolkswagenMebSafety(TestVolkswagenMebSafetyBase):
       self._rx(self._button_msg(bus=0))
       self.assertTrue(self.safety.get_controls_allowed(), f"controls not allowed on {button} falling edge")
 
+  def test_reengage_resets_heartbeat_mismatches(self):
+    # openpilot refuses RESUME, then engages with SET right before the heartbeat check would time out the RESUME
+    self.safety.safety_heartbeat(False)
+    self._rx(self._tsk_status_msg(False, main_switch=True))
+    for button in ("resume", "set"):
+      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
+      self._rx(self._button_msg(bus=0))
+      self.safety.safety_heartbeat_check()
+      self.safety.safety_heartbeat_check()
+      self.assertTrue(self.safety.get_controls_allowed())
+
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False, main_switch=True))
@@ -358,33 +337,14 @@ class TestVolkswagenMebGen2Safety(TestVolkswagenMebSafety):
   SAFETY_PARAM = VolkswagenSafetyFlags.MEB_ALT_CRC
 
 
-# ZAS_Kl_15=1
-class TestVolkswagenMebIgnition(common.SafetyTestBase):
+class TestVolkswagenMebIgnition(common.CanIgnitionSafetyTest):
   DBC = "vw_meb_generated"
-  SAFETY_MODEL = None
+  IGNITION_VALUES = range(2)
+  IGNITION_ON_VALUES = {1}  # ZAS_Kl_15
+  IGNITION_COUNTER_MOD = 16
 
-  TX_MSGS: list = []
-
-  def _msg(self, counter, ign):
-    return self.packer.make_can_msg_safety("Klemmen_Status_01", 0,
-                                           {"Klemmen_Status_01_BZ": counter,
-                                            "ZAS_Kl_15": ign})
-
-  def test_ignition_on(self):
-    for i in range(16):
-      self.safety.init_tests()
-      self.safety.ignition_can_hook(self._msg(i, 1))
-      self.assertFalse(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._msg((i + 1) % 16, 1))
-      self.assertTrue(self.safety.get_ignition_can())
-
-  def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0, 1))
-    self.safety.ignition_can_hook(self._msg(1, 1))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(2, 0))
-    self.safety.ignition_can_hook(self._msg(3, 0))
-    self.assertFalse(self.safety.get_ignition_can())
+  def _ignition_msg(self, value, counter=None, bus=0):
+    return self.packer.make_can_msg_safety("Klemmen_Status_01", bus, {"Klemmen_Status_01_BZ": counter, "ZAS_Kl_15": value})
 
 
 if __name__ == "__main__":

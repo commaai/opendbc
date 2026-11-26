@@ -100,14 +100,16 @@ static void volkswagen_tsk_status_check(int acc_status, bool stock_acc) {
 
   // Always exit controls on main switch off
   if (!safety.acc_main_on) {
-    safety.controls_allowed = false;
+    exit_controls();
   }
 }
 
 // Enter controls on falling edge of Set or Resume with main switch on
 static void volkswagen_set_resume_check(bool set_button, bool resume_button) {
   if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {
-    safety.controls_allowed = safety.acc_main_on;
+    if (safety.acc_main_on) {
+      enter_controls();
+    }
   }
   safety.volkswagen_set_button_prev = set_button;
   safety.volkswagen_resume_button_prev = resume_button;
@@ -116,7 +118,7 @@ static void volkswagen_set_resume_check(bool set_button, bool resume_button) {
 static int volkswagen_mlb_mqb_driver_input_torque(const CANPacket_t *msg) {
   // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
   // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
-  return sign_magnitude(GET_BYTES_LE(msg, 5, 2) & 0x1FFFU, GET_BIT(msg, 55U));
+  return sign_magnitude(GET_BYTES_LE(msg, 5, 2) & 0x3FFU, GET_BIT(msg, 55U));
 }
 
 static int volkswagen_mlb_mqb_steering_control_torque(const CANPacket_t *msg) {

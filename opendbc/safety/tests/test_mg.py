@@ -23,81 +23,44 @@ class TestMGSafety(common.CarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   DRIVER_TORQUE_ALLOWANCE = 100
   DRIVER_TORQUE_FACTOR = 2
 
-  def setUp(self):
-    super().setUp()
-    self.counters = {addr: 0 for addr in (0x1b6, 0x1ec, 0x23c, 0x242)}
-    self.gas_counter = 0
-
-  def _counter(self, addr):
-    counter = self.counters[addr]
-    self.counters[addr] = (counter + 1) % 16
-    return counter
-
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"LKAReqToqHSC2": torque, "LKAReqToqStsHSC2": steer_req}
     return self.packer.make_can_msg_safety("FVCM_HSC2_FrP03", 0, values)
 
   def _speed_msg(self, speed):
-    values = {"VehSpdAvgHSC2": speed * 3.6, "VehSpdAvgAlvRCHSC2": self._counter(0x23c)}
+    values = {"VehSpdAvgHSC2": speed * 3.6}
     return self.packer.make_can_msg_safety("SCS_HSC2_FrP19", 0, values)
 
   def _torque_driver_msg(self, torque):
-    values = {"DrvrStrgDlvrdToqHSC2": torque * 0.01, "ChLKAAlvRCHSC2": self._counter(0x1ec)}
+    values = {"DrvrStrgDlvrdToqHSC2": torque * 0.01}
     return self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values)
 
   def _user_brake_msg(self, brake):
-    values = {"BrkPdlAppdHSC2": 1 if brake else 0, "BrkPdlAppdRCHSC2": self._counter(0x1b6)}
+    values = {"BrkPdlAppdHSC2": 1 if brake else 0}
     return self.packer.make_can_msg_safety("EHBS_HSC2_FrP00", 0, values)
 
   def _user_gas_msg(self, gas):
     values = {"EPTAccelActuPosHSC2": 100 if gas else 0}
-    msg = self.packer.make_can_msg_safety("GW_HSC2_HCU_FrP00", 0, values)
-    msg[0].data[5] = (msg[0].data[5] & 0x0F) | ((self.gas_counter % 16) << 4)
-    self.gas_counter += 1
-    return msg
+    return self.packer.make_can_msg_safety("GW_HSC2_HCU_FrP00", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"ACCSysSts_RadarHSC2": 2 if enable else 1, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
+    values = {"ACCSysSts_RadarHSC2": 2 if enable else 1}
     return self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values)
 
   def test_cruise_states(self):
     for state in range(8):
       self._rx(self._pcm_status_msg(False))
-      values = {"ACCSysSts_RadarHSC2": state, "ACCSysAlvRlngCtr_SCSHSC2": self._counter(0x242)}
+      values = {"ACCSysSts_RadarHSC2": state}
       self._rx(self.packer.make_can_msg_safety("RADAR_HSC2_FrP00", 0, values))
       self.assertEqual(state in (2, 3), self.safety.get_controls_allowed())
 
-  def test_gas_counter(self):
-    self._reset_safety_hooks()
-    for _ in range(16):
-      self.assertTrue(self._rx(self._user_gas_msg(0)))
-
-    msg = self._user_gas_msg(0)
-    for _ in range(common.MAX_WRONG_COUNTERS + 1):
-      valid = self._rx(msg)
-    self.assertFalse(valid)
-
-  def test_rx_checksums(self):
-    # Captured EPS frame: the PV field is 0x37f5; byte 7 is unused.
+  def test_eps_checksum_captured_frame(self):
+    # a captured EPS frame: the packer computes its PV field 0x37f5, and the safety accepts it
     dat = bytes.fromhex("b40037f553f54000")
     values = {"ChLKAAlvRCHSC2": 11, "ChLKACtrlStsHSC2": 4, "ChLKARespToqHSC2": 0}
     packed = self.packer.make_can_msg_safety("EPS_HSC2_FrP03", 0, values)
     self.assertEqual(bytes(packed[0].data)[2:4], dat[2:4])
-
-    for byte, bit in ((0, 0), (0, 3), (0, 4), (1, 0), (2, 0), (3, 0), (6, 4)):
-      self._reset_safety_hooks()
-      self.assertTrue(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, dat)))
-      corrupt = bytearray(dat)
-      corrupt[byte] ^= 1 << bit
-      self.assertFalse(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, corrupt)))
-
-    for make_msg in (self._speed_msg, self._torque_driver_msg, self._user_brake_msg, self._pcm_status_msg):
-      self._reset_safety_hooks()
-      self.assertTrue(self._rx(make_msg(0)))
-
-      msg = make_msg(0)
-      msg[0].data[3 if make_msg == self._torque_driver_msg else 7] ^= 0xff
-      self.assertFalse(self._rx(msg))
+    self.assertTrue(self._rx(libsafety_py.make_CANPacket(0x1ec, 0, dat)))
 
 
 if __name__ == "__main__":

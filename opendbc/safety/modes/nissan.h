@@ -45,7 +45,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   // X-Trail 0x15c, Leaf 0x239
   if (msg_matches(msg, 0x15cU, safety_setup.nissan_alt_eps ? 1U : 0U) || msg_matches(msg, 0x239U, safety_setup.nissan_alt_eps ? 1U : 0U)) {
     if (msg->addr == 0x15cU) {
-      safety.gas_pressed = ((msg->data[5] << 2) | ((msg->data[6] >> 6) & 0x3U)) > 3U;
+      safety.gas_pressed = (GET_BYTES_BE(msg, 5, 2) >> 6) > 3U;  // GAS_PEDAL
     } else {
       safety.gas_pressed = msg->data[0] > 3U;
     }
@@ -78,6 +78,13 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
     bool lka_active = GET_BIT(msg, 52U);
 
     if (steer_angle_cmd_checks(desired_angle, lka_active, NISSAN_STEERING_LIMITS)) {
+      violation = true;
+    }
+
+    // Signal: LKAS.MAX_TORQUE
+    // the EPS torque limit, at most the 1 Nm openpilot sends, which the driver can easily overpower
+    const uint8_t NISSAN_MAX_LKAS_TORQUE = 100U;  // 0.01 Nm/LSB
+    if (msg->data[4] > NISSAN_MAX_LKAS_TORQUE) {
       violation = true;
     }
   }

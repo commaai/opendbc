@@ -105,7 +105,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
       // Signal: Motor_5.MO5_GRA_Hauptsch
       safety.acc_main_on = GET_BIT(msg, 50U);
       if (!safety.acc_main_on) {
-        safety.controls_allowed = false;
+        exit_controls();
       }
     }
 
@@ -114,11 +114,6 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
       // Signal: GRA_Neu.GRA_Neu_Setzen
       // Signal: GRA_Neu.GRA_Neu_Recall
       volkswagen_set_resume_check(GET_BIT(msg, 16U), GET_BIT(msg, 17U));
-      // Exit controls on rising edge of Cancel, override Set/Resume if present simultaneously
-      // Signal: GRA_ACC_01.GRA_Abbrechen
-      if (GET_BIT(msg, 9U)) {
-        safety.controls_allowed = false;
-      }
     }
   } else {
     if (msg_matches(msg, MSG_MOTOR_2, 0U)) {
@@ -128,6 +123,12 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
       bool cruise_engaged = (acc_status == 1U) || (acc_status == 2U);
       pcm_cruise_check(cruise_engaged);
     }
+  }
+
+  // Always exit controls on rising edge of Cancel, override Set/Resume if present simultaneously
+  // Signal: GRA_Neu.GRA_Abbrechen
+  if (msg_matches(msg, MSG_GRA_NEU, 0U) && GET_BIT(msg, 9U)) {
+    exit_controls();
   }
 
   // Signal: Motor_3.MO3_Pedalwert

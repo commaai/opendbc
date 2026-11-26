@@ -1,13 +1,18 @@
 import os
 import abc
+import functools
 import math
+import random
 import unittest
 import importlib
+import itertools
 import numpy as np
 from collections.abc import Callable
 
 from opendbc.can import CANPacker
-from opendbc.safety import ALTERNATIVE_EXPERIENCE
+from opendbc.can.dbc import SignalType
+from opendbc.can.packer import set_value
+from opendbc.safety import ALTERNATIVE_EXPERIENCE, DLC_TO_LEN
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.car.lateral import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK
 
@@ -52,11 +57,8 @@ def state_buffer(copy):
 
 
 class CANPackerSafety(CANPacker):
-  def make_can_msg_safety(self, name_or_addr, bus, values, fix_checksum=None):
-    msg = self.make_can_msg(name_or_addr, bus, values)
-    if fix_checksum is not None:
-      msg = fix_checksum(msg)
-    addr, dat, bus = msg
+  def make_can_msg_safety(self, name_or_addr, bus, values):
+    addr, dat, bus = self.make_can_msg(name_or_addr, bus, values)
     return libsafety_py.make_CANPacket(addr, bus, dat)
 
 
@@ -760,6 +762,20 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
         should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
+    # around zero, at CAN resolution: only moving away from a non-zero angle is winding up, anything else uses the down limit.
+    # past the last breakpoint (2 m/s past it, beyond the safety's 1 m/s speed fudge) the down limit is its last value,
+    # computed in float32 like the safety
+    down = int(np.float32(self.ANGLE_RATE_DOWN[-1]) * np.float32(self.DEG_TO_CAN) + np.float32(1.))
+
+    self._reset_speed_measurement(self.ANGLE_RATE_BP[-1] + 2)
+    for last in (-1, 0, 1):
+      for sign in (-1, 1):
+        self.safety.set_controls_allowed(True)
+        self.safety.set_desired_angle_last(last)
+        cmd = last + sign * down
+        winding_up = last * sign > 0  # the up limit is lower, so it doesn't allow this
+        self.assertEqual(not winding_up, self._tx(self._angle_cmd_msg(cmd / self.DEG_TO_CAN, True)), (last, cmd))
+
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while
     # steer actuation bit is 0, regardless of controls allowed.
@@ -921,6 +937,115 @@ class CurvatureSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.assertFalse(self._tx(self._curvature_cmd_msg(2 * max_curvature_delta, True)))
 
 
+class CanIgnitionSafetyTest(SafetyTestBase):
+  """ignition_can_hook runs on every CAN msg whatever the safety mode, reading ignition from a car's power state msg.
+  A car with one fills in _ignition_msg and the config below."""
+  SAFETY_MODEL = None
+  IGNITION_VALUES: range  # every raw power state
+  IGNITION_ON_VALUES: set[int]  # the power states that mean ignition on
+  # the msg counter wraps at this, and only a msg whose counter follows the previous one's is read; None if ungated
+  IGNITION_COUNTER_MOD: int | None = None
+  IGNITION_BUSES: tuple[int, ...] = (0,)  # each bus keeps its own previous counter
+
+  @abc.abstractmethod
+  def _ignition_msg(self, value: int, counter: int | None = None, bus: int = 0):
+    raise NotImplementedError(f"{type(self).__name__} must implement _ignition_msg")
+
+  @property
+  def _on(self) -> int:
+    return min(self.IGNITION_ON_VALUES)
+
+  @property
+  def _off(self) -> int:
+    return min(set(self.IGNITION_VALUES) - self.IGNITION_ON_VALUES)
+
+  def _ign_msg(self, value: int, counter: int, bus: int = 0, length_delta: int = 0):
+    msg = self._ignition_msg(value, None if self.IGNITION_COUNTER_MOD is None else counter % self.IGNITION_COUNTER_MOD, bus)
+    if length_delta:
+      length = DLC_TO_LEN[msg[0].data_len_code] + length_delta
+      msg = libsafety_py.make_CANPacket(msg[0].addr, msg[0].bus, bytes(msg[0].data[0:length]))
+    return msg
+
+  def _ignition(self, msg, read: bool) -> bool:
+    # ignition_can_cnt is panda firmware's ignition timeout: each msg read resets it, an ignored one leaves it be
+    self.safety.ignition_can_cnt = 1234
+    self.safety.ignition_can_hook(msg)
+    self.assertEqual(read, self.safety.ignition_can_cnt == 0, "msg read" if read else "msg ignored")
+    return self.safety.get_ignition_can()
+
+  def _send(self, value: int, counter: int, bus: int = 0, read: bool = True) -> bool:
+    return self._ignition(self._ign_msg(value, counter, bus), read)
+
+  def _send_first(self, value: int, counter: int, bus: int = 0) -> bool:
+    # the first msg after init_tests is read only when there is no counter to follow
+    return self._send(value, counter, bus, read=self.IGNITION_COUNTER_MOD is None)
+
+  def test_ignition_values(self):
+    # after a msg that latched on or off, the next msg (with the next counter) latches each power state
+    for bus, prev, value in itertools.product(self.IGNITION_BUSES, (self._on, self._off), self.IGNITION_VALUES):
+      self.safety.init_tests()
+      self._send_first(prev, 0, bus)
+      self.assertEqual(prev in self.IGNITION_ON_VALUES, self._send(prev, 1, bus))
+      self.assertEqual(value in self.IGNITION_ON_VALUES, self._send(value, 2, bus), (bus, prev, value))
+
+  def test_ignition_counter_wrap(self):
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    mod = self.IGNITION_COUNTER_MOD
+    for bus, counter in itertools.product(self.IGNITION_BUSES, range(mod)):
+      self.safety.init_tests()
+      self.assertFalse(self._send(self._on, counter, bus, read=False))
+      self.assertTrue(self._send(self._on, counter + 1, bus), (bus, counter))
+
+  def test_ignition_counter_skipped(self):
+    # a skipped or repeated counter is not read, in either direction, and the next consecutive one is
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    mod = self.IGNITION_COUNTER_MOD
+    for bus, counter, value in itertools.product(self.IGNITION_BUSES, range(mod), (self._on, self._off)):
+      latched = value not in self.IGNITION_ON_VALUES
+      other = self._on if latched else self._off
+      self.safety.init_tests()
+      self._send(other, counter, bus, read=False)
+      self.assertEqual(latched, self._send(other, counter + 1, bus))
+      self.assertEqual(latched, self._send(value, counter + 3, bus, read=False), (bus, counter, value))
+      self.assertEqual(latched, self._send(value, counter + 3, bus, read=False), (bus, counter, value))
+      self.assertEqual(not latched, self._send(value, counter + 4, bus), (bus, counter, value))
+
+  def test_ignition_init_resets_counter(self):
+    # init_tests forgets the previous counter, so no test sees a counter left over from another one
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    for bus in self.IGNITION_BUSES:
+      self.safety.init_tests()
+      self._send(self._on, 0, bus, read=False)
+      self.safety.init_tests()
+      self.assertFalse(self._send(self._on, 1, bus, read=False))
+
+  def test_ignition_buses_independent(self):
+    if self.IGNITION_COUNTER_MOD is None:
+      self.skipTest("ignition msg has no counter")
+    if len(self.IGNITION_BUSES) < 2:
+      self.skipTest("ignition msg is read on one bus")
+    for bus, other_bus in itertools.permutations(self.IGNITION_BUSES, 2):
+      self.safety.init_tests()
+      self._send(self._on, 0, bus, read=False)
+      self.assertFalse(self._send(self._on, 1, other_bus, read=False))
+      self.assertTrue(self._send(self._on, 1, bus))
+
+  def test_ignition_wrong_bus_or_length(self):
+    # a msg on another bus or with another length is ignored: an off one neither latches off nor advances the
+    # previous counter, so a good off msg with the very same counter still follows the last good one
+    wrong = [(bus, 0) for bus in range(4) if bus not in self.IGNITION_BUSES] + [(bus, -1) for bus in self.IGNITION_BUSES]
+    for bus, length_delta in wrong:
+      good_bus = bus if bus in self.IGNITION_BUSES else self.IGNITION_BUSES[0]
+      self.safety.init_tests()
+      self._send_first(self._on, 0, good_bus)
+      self.assertTrue(self._send(self._on, 1, good_bus))
+      self.assertTrue(self._ignition(self._ign_msg(self._off, 2, bus, length_delta), read=False), (bus, length_delta))
+      self.assertFalse(self._send(self._off, 2, good_bus), (bus, length_delta))
+
+
 class SafetyTest(SafetyTestBase):
   TX_MSGS: list[list[int]] = []
   SCANNED_ADDRS = [*range(0x800),                      # Entire 11-bit CAN address space
@@ -965,6 +1090,12 @@ class SafetyTest(SafetyTestBase):
     self.assertTrue(self.safety.get_controls_allowed())
     self.safety.set_controls_allowed(0)
     self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_rx_checks_unused_msgs(self):
+    # unused alternative message slots of an RX check are zeroed, so a zeroed message (address 0, bus 0, length 0) must not match one
+    self._rx(make_msg(0, 0, 0))
+    for i in range(self.safety.get_rx_checks_len()):
+      self.assertFalse(self.safety.safety_a.state.rx_status[i].msg_seen)
 
   def test_tx_hook_on_wrong_safety_mode(self):
     files = os.listdir(os.path.dirname(os.path.realpath(__file__)))
@@ -1079,7 +1210,196 @@ class CarSafetyTest(SafetyTest):
   def _pcm_status_msg(self, enable):
     pass
 
+  # {msg name: {signal: valid values}} of the quality flags of the RX checked msgs
+  RX_QUALITY_FLAGS: dict[str, dict[str, tuple[int, ...]]] = {}
+
+  def _rx_check_msg(self, addr: int, bus: int, values: dict[str, float] | None = None):
+    """The RX checked msg's next frame, valid unless values say otherwise"""
+    name = self.packer.dbc.addr_to_msg[addr].name
+    quality_flags = {sig: valid[0] for sig, valid in self.RX_QUALITY_FLAGS.get(name, {}).items()}
+    return self.packer.make_can_msg_safety(addr, bus, {**quality_flags, **(values or {})})
+
+  def _rx_check_builders(self):
+    """(index, msg check, build) of each C RX checked msg in the DBC. A car sends one of an RX check's alternative msgs.
+    build(values) makes the msg's next frame"""
+    cfg = self.safety.safety_a.setup.current_safety_config
+    builders = []
+    for i in range(cfg.rx_checks_len):
+      # the DBC has one of the alternatives, or several. Unused alternative slots have addr 0, in no DBC
+      msgs = [m for m in cfg.rx_checks[i].msg if m.addr in self.packer.dbc.addr_to_msg]
+      self.assertTrue(msgs, f"RX check {i}: none of its msgs are in {self.DBC}")
+      builders += [(i, m, functools.partial(self._rx_check_msg, m.addr, m.bus)) for m in msgs]
+    return builders
+
+  def _rx_invalid(self, msg, err_msg):
+    """Whether msg fails RX. A failing msg must disengage, and change nothing but the RX status"""
+    rx_status_start = libsafety_py.ffi.offsetof("SafetyState", "rx_status")
+    rx_status_end = rx_status_start + libsafety_py.ffi.sizeof(self.safety.safety_a.state.rx_status)
+
+    def state():
+      buf = state_buffer("safety_a")[:]
+      return buf[:rx_status_start] + buf[rx_status_end:]
+
+    self.safety.set_controls_allowed(True)
+    before = state()
+    if self._rx(msg):
+      return False
+    self.assertFalse(self.safety.get_controls_allowed(), err_msg)
+    self.safety.set_controls_allowed(True)
+    self.assertEqual(before, state(), err_msg)
+    return True
+
+  def _raw_msg(self, name: str, bus: int, raw_values: dict[str, int]):
+    """A valid frame of the msg with these raw signal values, and the other signals zero"""
+    msg = self.packer.dbc.name_to_msg[name]
+    values = {sig: raw * msg.sigs[sig].factor + msg.sigs[sig].offset for sig, raw in raw_values.items()}
+    return self._rx_check_msg(msg.address, bus, values)
+
+  def _test_signal_bits(self, msg_func: MessageFunction, get_state: Callable[[], bool], threshold: float):
+    """Every bit of every signal msg_func writes must turn the state on or leave it off, as the signal's value says.
+    msg_func(threshold) is the last frame that leaves the state off, and msg_func(threshold + 1) turns it on"""
+    off_msg, on_msg = msg_func(threshold)[0], msg_func(threshold + 1)[0]
+    self.assertEqual(off_msg.addr, on_msg.addr)
+    msg = self.packer.dbc.addr_to_msg[off_msg.addr]
+    enums = {val.name for val in self.packer.dbc.vals if val.address == msg.address}
+
+    # the signals msg_func writes, with their raw values in the off and on frames. Counters and checksums change every frame
+    off_raws, on_raws = {}, {}
+    for sig in msg.sigs.values():
+      off_raw, on_raw = sig.get_raw_value(bytes(off_msg.data)), sig.get_raw_value(bytes(on_msg.data))
+      if off_raw != on_raw and sig.type == SignalType.DEFAULT and sig.name != "COUNTER":
+        off_raws[sig.name], on_raws[sig.name] = off_raw, on_raw
+    self.assertTrue(off_raws, f"{msg.name}: msg_func writes no signal")
+
+    def turns_on(name: str, raw: int) -> bool:
+      sig = msg.sigs[name]
+      if name in enums:  # a state, like VehStop_D_Stat: anything but the off state
+        return raw != off_raws[name]
+      if on_raws[name] < off_raws[name]:  # inverted, like GAS_RELEASED
+        return raw < off_raws[name]
+      # a magnitude, like a wheel speed either way
+      return abs(raw * sig.factor + sig.offset) > abs(off_raws[name] * sig.factor + sig.offset)
+
+    # each signal alone at every bit, around the off value, and at its max, so no bit can be decoded from the wrong place
+    one_signal_values = []
+    for name, off_raw in off_raws.items():
+      max_raw = (1 << msg.sigs[name].size) - 1
+      raws = {0, max(off_raw - 1, 0), off_raw, min(off_raw + 1, max_raw), on_raws[name], max_raw}
+      raws |= {1 << bit for bit in range(msg.sigs[name].size)}
+      one_signal_values += [{name: raw} for raw in sorted(raws)]
+
+    # every combination of signals at their on values, so signals can't cancel each other out, as when summed
+    combined_values = []
+    for count in range(2, len(off_raws) + 1):
+      for combination in itertools.combinations(off_raws, count):
+        combined_values.append({name: on_raws[name] for name in combination})
+
+    for raw_values in one_signal_values + combined_values:
+      # the other signals stay off
+      self.assertTrue(self._rx(self._raw_msg(msg.name, off_msg.bus, off_raws | raw_values)), raw_values)
+      expected = any(turns_on(name, raw) for name, raw in raw_values.items())
+      self.assertEqual(expected, get_state(), raw_values)
+
   # ***** standard tests for all car-specific safety modes *****
+
+  def test_rx_checksum(self):
+    # the C checksum agrees with the packer's on every bit flip of an RX checked msg, and a frame failing it fails RX.
+    # The frames are a random one and its complement, so every bit is flipped both ways
+    for i, m, _ in self._rx_check_builders():
+      if m.ignore_checksum:
+        continue
+      sigs = self.packer.dbc.addr_to_msg[m.addr].sigs.values()
+      checksums = [(sig, sig.calc_checksum) for sig in sigs if sig.calc_checksum]
+      self.assertTrue(checksums, f"{m.addr=:#x}: the packer doesn't compute its checksum")
+      rand = random.Random(m.addr).randbytes(m.len)
+      for dat in (bytearray(rand), bytearray(b ^ 0xFF for b in rand)):
+        for sig, calc in checksums:
+          set_value(dat, sig, calc(m.addr, sig, dat))
+        for byte in range(m.len):
+          for bit in range(8):
+            err_msg = f"{m.addr=:#x} {m.bus=} {byte=} {bit=}"
+            flipped = bytearray(dat)
+            flipped[byte] ^= 1 << bit
+            valid = all(calc(m.addr, sig, bytearray(flipped)) == sig.get_raw_value(flipped) for sig, calc in checksums)
+            msg = libsafety_py.make_CANPacket(m.addr, m.bus, bytes(flipped))
+
+            self._reset_safety_hooks()
+            if valid:
+              self._rx(msg)
+            else:
+              self.assertTrue(self._rx_invalid(msg, err_msg), err_msg)
+            self.assertEqual(valid, self.safety.safety_a.state.rx_status[i].valid_checksum, err_msg)
+
+  def test_rx_reads_only_signal_bits(self):
+    # the safety reads only the bits of the msg's signals. The bits outside them, in the msg and past its length,
+    # change nothing, whatever they hold
+    for _, m, build in self._rx_check_builders():
+      with self.subTest(addr=hex(m.addr), bus=m.bus):
+        msg = build()  # keep the packet alive while reading its data
+        dat = bytes(msg[0].data)[:m.len]
+
+        # the same frame with every bit outside the signals set
+        sigs = self.packer.dbc.addr_to_msg[m.addr].sigs.values()
+        signal_bits = bytearray(m.len)
+        for sig in sigs:
+          set_value(signal_bits, sig, (1 << sig.size) - 1)
+        noisy_dat = bytearray(byte | (~mask & 0xFF) for byte, mask in zip(dat, signal_bits, strict=True))
+        for sig in sigs:
+          if sig.calc_checksum:
+            set_value(noisy_dat, sig, sig.calc_checksum(m.addr, sig, noisy_dat))
+
+        states = []
+        for frame, fill in ((dat, 0x00), (bytes(noisy_dat), 0xFF)):
+          self._reset_safety_hooks()
+          self.assertTrue(self._rx(libsafety_py.make_CANPacket(m.addr, m.bus, frame, fill)), f"{fill=:#x}")
+          states.append(state_buffer("safety_a")[:])
+        self.assertEqual(states[0], states[1])
+
+  def test_rx_counter(self):
+    # a counter sequence with rollover is valid. Replayed or skipped counters fail RX from the MAX_WRONG_COUNTERS'th on,
+    # unless the RX check ignores counters, and valid frames recover
+    for i, m, build in self._rx_check_builders():
+      with self.subTest(addr=hex(m.addr), bus=m.bus):
+        self._reset_safety_hooks()
+        for n in range(m.max_counter + 2):
+          msg = build()
+          self.assertTrue(self._rx(msg), f"frame {n}")
+          if n > 0:  # the first frame's counter has nothing to follow
+            self.assertEqual(0, self.safety.safety_a.state.rx_status[i].wrong_counters, f"frame {n}")
+
+        for name in ("replay", "skip"):
+          for n in range(MAX_WRONG_COUNTERS + 1):
+            if name == "skip":
+              build()
+              msg = build()
+            err_msg = f"{name} {n}"
+            if m.ignore_counter or n < MAX_WRONG_COUNTERS - 1:
+              self.assertTrue(self._rx(msg), err_msg)
+            else:
+              self.assertTrue(self._rx_invalid(msg, err_msg), err_msg)
+          for n in range(MAX_WRONG_COUNTERS):
+            self.assertTrue(self._rx(build()), f"{name} recovery {n}")
+
+  def test_rx_quality_flag(self):
+    # an RX checked msg is valid only while each of its quality flags is
+    for _, m, build in self._rx_check_builders():
+      if m.ignore_quality_flag:
+        continue
+      msg = self.packer.dbc.addr_to_msg[m.addr]
+      for sig, valid in self.RX_QUALITY_FLAGS[msg.name].items():
+        for value in range(1 << msg.sigs[sig].size):
+          err_msg = f"{msg.name} {sig}={value}"
+          self._reset_safety_hooks()
+          if value in valid:
+            self.assertTrue(self._rx(build({sig: value})), err_msg)
+          else:
+            self.assertTrue(self._rx_invalid(build({sig: value}), err_msg), err_msg)
+
+  def test_gas_pressed_bits(self):
+    self._test_signal_bits(self._user_gas_msg, self.safety.get_gas_pressed_prev, self.GAS_PRESSED_THRESHOLD)
+
+  def test_vehicle_moving_bits(self):
+    self._test_signal_bits(self._vehicle_moving_msg, self.safety.get_vehicle_moving, self.STANDSTILL_THRESHOLD)
 
   def test_relay_malfunction(self):
     # each car has an addr that is used to detect relay malfunction

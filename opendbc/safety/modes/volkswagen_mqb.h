@@ -49,14 +49,13 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
 static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state by sampling wheel speeds
   if (msg_matches(msg, MSG_ESP_19, 0U)) {
-    // sum 4 wheel speeds
-    uint32_t speed = 0U;
-    for (int i = 0; i < 8; i += 2) {
-      uint32_t wheel_speed = GET_BYTES_LE(msg, i, 2);
-      speed += wheel_speed;
-    }
     // Check all wheel speeds for any movement
-    safety.vehicle_moving = speed > 0U;
+    // Signals: ESP_19.ESP_[HL|HR|VL|VR]_Radgeschw_02
+    uint32_t hl = GET_BYTES_LE(msg, 0, 2);
+    uint32_t hr = GET_BYTES_LE(msg, 2, 2);
+    uint32_t vl = GET_BYTES_LE(msg, 4, 2);
+    uint32_t vr = GET_BYTES_LE(msg, 6, 2);
+    safety.vehicle_moving = (hl | hr | vl | vr) != 0U;
   }
 
   // Update driver input torque samples
@@ -81,7 +80,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // Always exit controls on rising edge of Cancel
     // Signal: GRA_ACC_01.GRA_Abbrechen
     if (GET_BIT(msg, 13U)) {
-      safety.controls_allowed = false;
+      exit_controls();
     }
   }
 

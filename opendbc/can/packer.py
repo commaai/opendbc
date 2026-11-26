@@ -27,18 +27,20 @@ class CANPacker:
         ival = (1 << sig.size) + ival
       set_value(dat, sig, ival)
       if sig.type == SignalType.COUNTER or sig.name == "COUNTER":
-        self.counters[address] = int(value)
         counter_set = True
-    sig_counter = next((s for s in msg.sigs.values() if s.type == SignalType.COUNTER or s.name == "COUNTER"), None)
-    if sig_counter and not counter_set:
-      if address not in self.counters:
-        self.counters[address] = 0
-      set_value(dat, sig_counter, self.counters[address])
-      self.counters[address] = (self.counters[address] + 1) % (1 << sig_counter.size)
-    sig_checksum = next((s for s in msg.sigs.values() if s.type > SignalType.COUNTER), None)
-    if sig_checksum and sig_checksum.calc_checksum:
-      checksum = sig_checksum.calc_checksum(address, sig_checksum, dat)
-      set_value(dat, sig_checksum, checksum)
+    # a counter may be split across signals
+    counter_sigs = [s for s in msg.sigs.values() if s.type == SignalType.COUNTER or s.name == "COUNTER"]
+    if counter_set:
+      self.counters[address] = sum(s.get_raw_value(dat) << s.counter_shift for s in counter_sigs)
+    elif counter_sigs:
+      counter = self.counters.get(address, 0)
+      for sig in counter_sigs:
+        set_value(dat, sig, counter >> sig.counter_shift)
+      self.counters[address] = (counter + 1) % (counter_sigs[0].max_counter + 1)
+    for sig in msg.sigs.values():
+      if sig.calc_checksum:
+        checksum = sig.calc_checksum(address, sig, dat)
+        set_value(dat, sig, checksum)
     return dat
 
   def make_can_msg(self, name_or_addr, bus: int, values: Mapping[str, float]):

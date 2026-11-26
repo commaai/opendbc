@@ -44,7 +44,6 @@
 #define SAFETY_MG 38U
 #endif
 
-#define GET_BIT(msg, b) ((((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U) != 0U)
 #define GET_FLAG(value, mask) (((value) & (mask)) == (mask))
 
 // length of an RX check array; fails to compile if it has more checks than rx_status can track:

@@ -140,41 +140,11 @@ class TestHeartbeat(common.SafetyTestBase):
       self.safety.set_controls_allowed(True)
       for _ in range(3):
         self.assertTrue(self.safety.get_controls_allowed())
+        self._rx(common.make_msg(0, 0x123))  # only a rising edge of controls_allowed resets the mismatches
         self.safety.safety_heartbeat_check()
       self.assertEqual(engaged, self.safety.get_controls_allowed())
       self.safety.safety_heartbeat_check()
       self.assertEqual(0, self.safety.safety_a.state.heartbeat_engaged_mismatches)
-
-
-class TestIgnitionCan(common.SafetyTestBase):
-  SAFETY_MODEL = None
-  # (bus, addr, len, counter byte, counter shift, ignition on data) of each ignition message with a counter
-  MSGS = ((0, 0x152, 8, 1, 0, {7: 0x10}), (0, 0x221, 8, 6, 4, {0: 0x60}), (0, 0x3C0, 4, 1, 0, {2: 0x02}),
-          (0, 0x432, 8, 1, 0, {6: 0x01}), (2, 0x432, 8, 1, 0, {6: 0x01}))
-
-  def _send(self, msg, counter):
-    bus, addr, length, counter_byte, shift, ign_data = msg
-    dat = bytearray(length)
-    dat[counter_byte] = counter << shift
-    for i, v in ign_data.items():
-      dat[i] = v
-    self.safety.ignition_can_hook(common.make_msg(bus, addr, dat=bytes(dat)))
-    return self.safety.get_ignition_can()
-
-  def test_counter_skipped(self):
-    # ignition is only read from a message whose counter follows the previous one
-    for msg in self.MSGS:
-      self.safety.init_tests()
-      for counter, ignition in ((0, False), (2, False), (3, True)):
-        self.assertEqual(ignition, self._send(msg, counter), (msg[:2], counter))
-
-  def test_init_resets_counters(self):
-    # init_tests forgets the previous counters, so no test sees a counter left over from another one
-    for msg in self.MSGS:
-      self.safety.init_tests()
-      self._send(msg, 0)
-      self.safety.init_tests()
-      self.assertFalse(self._send(msg, 1), msg[:2])
 
 
 class TestModeCount(common.SafetyTestBase):
