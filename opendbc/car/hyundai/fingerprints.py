@@ -538,6 +538,15 @@ FW_VERSIONS = {
       b'\xf1\x00DH  LKAS AT USA LHD 1.01 1.04 95895-B1500 181213',
     ],
   },
+  CAR.GENESIS_G80_ELECTRIFIED_1ST_GEN: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00RGev SCC FHCUP      1.00 1.01 99110-JI010         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00RG3EMFC  AT USA LHD 1.00 1.01 99211-JI010 210419',
+      b'\xf1\x00RG3EMFC  AT USA LHD 1.00 1.02 99211-JI010 220614',
+    ],
+  },
   CAR.GENESIS_G80_2ND_GEN_FL: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00RG3_ SCC -----      1.00 1.02 99110-T1120         ',
