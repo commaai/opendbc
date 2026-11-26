@@ -1,6 +1,6 @@
 import numpy as np
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, structs
 from opendbc.car.lateral import apply_driver_steer_torque_limits
 from opendbc.car.gm import gmcan
 from opendbc.car.common.conversions import Conversions as CV
@@ -90,12 +90,20 @@ class CarController(CarControllerBase):
           self.apply_gas = self.params.INACTIVE_REGEN
           self.apply_brake = 0
         else:
-          self.apply_gas = float(np.interp(actuators.accel, self.params.GAS_LOOKUP_BP, self.params.GAS_LOOKUP_V))
-          self.apply_brake = int(round(np.interp(actuators.accel, self.params.BRAKE_LOOKUP_BP, self.params.BRAKE_LOOKUP_V)))
+          # Gas/regen: torque for the requested accel plus gravity on the current grade (pitch positive uphill) and aero drag.
+          # One straight line through zero with the same slope for drive and regen, so there is no step to hunt across
+          pitch = CC.orientationNED[1] if len(CC.orientationNED) == 3 else 0.
+          wheel_accel = actuators.accel + ACCELERATION_DUE_TO_GRAVITY * np.sin(pitch) + self.params.AERO_DECEL * CS.out.vEgo ** 2
+          self.apply_gas = float(np.clip(self.params.GAS_PER_ACCEL * wheel_accel, self.params.MAX_ACC_REGEN, self.params.MAX_GAS))
           # Don't allow any gas above inactive regen while stopping
           # FIXME: brakes aren't applied immediately when enabling at a stop
           if stopping:
             self.apply_gas = self.params.INACTIVE_REGEN
+
+          # Friction brake: a decel setpoint, so it gets the requested accel directly. Only while the powertrain isn't
+          # asked to drive, so it never fights drive torque
+          self.apply_brake = int(round(np.clip(-self.params.BRAKE_PER_ACCEL * actuators.accel, 0, self.params.MAX_BRAKE))) \
+                             if self.apply_gas < 0 else 0
 
         idx = (self.frame // 4) % 4
 

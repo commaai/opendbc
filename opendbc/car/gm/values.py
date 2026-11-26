@@ -32,31 +32,26 @@ class CarControllerParams:
   ACCEL_MAX = 2.  # m/s^2
   ACCEL_MIN = -4.  # m/s^2
 
+  # Aero drag added back to the gas request: m/s^2 per (m/s)^2, same on every platform measured
+  AERO_DECEL = 0.0003
+  # The friction brake command is a deceleration setpoint the brake module tracks itself (it handles grade and
+  # regen/engine braking), ~0.85-0.97 m/s^2 per 100 counts on every platform measured
+  BRAKE_PER_ACCEL = 100.
+
   def __init__(self, CP):
-    # Gas/brake lookups
     self.MAX_BRAKE = 400  # ~ -4.0 m/s^2 with regen
 
     if CP.carFingerprint in (CAMERA_ACC_CAR | SDGM_CAR):
       self.MAX_GAS = 1346.0
       self.MAX_ACC_REGEN = -540.0
       self.INACTIVE_REGEN = -500.0
-      # Camera ACC vehicles have no regen while enabled.
-      # Camera transitions to MAX_ACC_REGEN from zero gas and uses friction brakes instantly
-      max_regen_acceleration = 0.
-
     else:
       self.MAX_GAS = 1018.0  # Safety limit, not ACC max. Stock ACC >2042 from standstill.
       self.MAX_ACC_REGEN = -650.0  # Max ACC regen is slightly less than max paddle regen
       self.INACTIVE_REGEN = -650.0
-      # ICE has much less engine braking force compared to regen in EVs,
-      # lower threshold removes some braking deadzone
-      max_regen_acceleration = -1. if CP.carFingerprint in EV_CAR else -0.1
 
-    self.GAS_LOOKUP_BP = [max_regen_acceleration, 0., self.ACCEL_MAX]
-    self.GAS_LOOKUP_V = [self.MAX_ACC_REGEN, 0., self.MAX_GAS]
-
-    self.BRAKE_LOOKUP_BP = [self.ACCEL_MIN, max_regen_acceleration]
-    self.BRAKE_LOOKUP_V = [self.MAX_BRAKE, 0.]
+    # GasRegenCmd is an axle torque request in Nm (EV and ICE). Torque per m/s^2 of wheel accel ~ mass * wheel radius
+    self.GAS_PER_ACCEL = GAS_PER_ACCEL.get(CP.carFingerprint, GAS_PER_ACCEL_DEFAULT)
 
 
 class GMSafetyFlags(IntFlag):
@@ -286,6 +281,26 @@ ALT_ACCS = {CAR.GMC_YUKON}
 
 # We're integrated at the Safety Data Gateway Module on these cars
 SDGM_CAR = {CAR.CADILLAC_XT4, CAR.CHEVROLET_VOLT_2019, CAR.CHEVROLET_TRAVERSE}
+
+# Commanded axle torque (GasRegenCmd, Nm) per m/s^2 of wheel acceleration, fitted from logged drives, for the cars
+# that can run openpilot longitudinal. EVs match mass * wheel radius; ICE cars need ~20-25% more
+GAS_PER_ACCEL = {
+  CAR.CHEVROLET_BOLT_EUV: 580.,
+  CAR.CHEVROLET_VOLT: 560.,
+  CAR.CHEVROLET_VOLT_2019: 580.,  # 1 device
+  CAR.CHEVROLET_TRAILBLAZER: 580.,  # 3 devices
+  CAR.CHEVROLET_EQUINOX: 830.,
+  CAR.BUICK_REGAL: 860.,  # 1 device
+  CAR.BUICK_LACROSSE: 860.,  # unmeasured, same as Regal
+  CAR.CHEVROLET_TRAVERSE: 870.,
+  CAR.GMC_ACADIA: 1080.,  # 2 devices
+  CAR.CADILLAC_ESCALADE: 1100.,  # 1 device, from the car's reported torque
+  CAR.GMC_YUKON: 1100.,  # 1 device, from the car's reported torque
+  CAR.CADILLAC_ESCALADE_ESV: 1200.,  # unmeasured, same as Escalade ESV 2019
+  CAR.CADILLAC_ESCALADE_ESV_2019: 1200.,  # 1 device, friction brake response unverified
+  CAR.CHEVROLET_SILVERADO: 1220.,
+}
+GAS_PER_ACCEL_DEFAULT = min(GAS_PER_ACCEL.values())  # unmeasured cars: lowest value, so they under-deliver rather than overshoot
 
 STEER_THRESHOLD = 1.0
 

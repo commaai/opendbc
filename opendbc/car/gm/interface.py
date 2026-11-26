@@ -98,7 +98,9 @@ class CarInterface(CarInterfaceBase):
     else:
       ret.transmissionType = TransmissionType.automatic
 
-    ret.longitudinalTuning.kiBP = [5., 35.]
+    # The gas/brake model in CarController covers drag, grade and the brake loop, so the integrator only trims small errors.
+    # A low gain also avoids amplifying the ~1.8 Hz driveline mode that [2.4, 1.5] excited
+    ret.longitudinalTuning.kiV = [0.5]
 
     if candidate in (CAMERA_ACC_CAR | SDGM_CAR):
       ret.alphaLongitudinalAvailable = candidate not in SDGM_CAR
@@ -108,9 +110,6 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[0].safetyParam |= GMSafetyFlags.HW_CAM.value
       ret.minEnableSpeed = -1 if candidate in SDGM_CAR else 5 * CV.KPH_TO_MS
       ret.minSteerSpeed = 10 * CV.KPH_TO_MS
-
-      # Tuning for experimental long
-      ret.longitudinalTuning.kiV = [2.0, 1.5]
 
       if alpha_long:
         ret.pcmCruise = False
@@ -131,9 +130,6 @@ class CarInterface(CarInterfaceBase):
       # supports stop and go, but initial engage must (conservatively) be above 18mph
       ret.minEnableSpeed = 18 * CV.MPH_TO_MS
       ret.minSteerSpeed = 7 * CV.MPH_TO_MS
-
-      # Tuning
-      ret.longitudinalTuning.kiV = [2.4, 1.5]
 
     # These cars have been put into dashcam only due to both a lack of users and test coverage.
     # These cars likely still work fine. Once a user confirms each car works and a test route is
@@ -183,6 +179,7 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.CHEVROLET_BOLT_EUV:
       ret.steerActuatorDelay = 0.2
+      ret.longitudinalActuatorDelay = 0.3  # car accel trails the command by ~0.25-0.3 s, not 0.5 s
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     elif candidate == CAR.CHEVROLET_SILVERADO:
