@@ -17,6 +17,7 @@ FW_VERSIONS: OfflineFwVersions = {
     ],
     (Ecu.fwdCamera, 0x18da31f1, None): [
       b'\x01\x01\x06\x00\x06 \x00\x03 \x00\x00\x01\x00&',  # 2022 Promaster 3500 w/LKAS (2 vans), 2025 Promaster 2500 ACC-only
+      b'\x01\x01\x06\x00\x06 \x00\x03 \x00\x00\x02\x00&',  # 2025 Promaster 2500 w/lane centering
     ],
   },
 }
