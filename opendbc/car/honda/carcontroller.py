@@ -32,6 +32,21 @@ def compute_gas_brake(accel, speed, CP):
     return compute_gb_honda_nidec(accel, speed)
 
 
+def compute_bosch_gas(params, accel: float, v_ego: float, coast_braking: bool) -> tuple[float, float]:
+  # Returns (gas, min_gas_accel). Requests below min_gas_accel are sent as BRAKE_REQUEST, which lights the brake lights.
+  gas = float(np.interp(accel, params.BOSCH_GAS_LOOKUP_BP, params.BOSCH_GAS_LOOKUP_V))
+  min_gas_accel = params.BOSCH_GAS_LOOKUP_BP[0]
+  if len(params.BOSCH_COAST_GAS_LOOKUP_BP):
+    # blend from the default lookup at low speed to the coast lookup at cruising speed
+    coast_w = float(np.interp(v_ego, params.BOSCH_COAST_SPEED_BP, [0.0, 1.0]))
+    coast_gas = float(np.interp(accel, params.BOSCH_COAST_GAS_LOOKUP_BP, params.BOSCH_COAST_GAS_LOOKUP_V))
+    gas = (1 - coast_w) * gas + coast_w * coast_gas
+    min_gas_accel = (1 - coast_w) * min_gas_accel + coast_w * params.BOSCH_COAST_GAS_LOOKUP_BP[0]
+    if coast_braking:
+      min_gas_accel += coast_w * params.BOSCH_COAST_BRAKE_HYST
+  return gas, min_gas_accel
+
+
 # TODO not clear this does anything useful
 def actuator_hysteresis(brake, braking, brake_steady):
   # hyst params
@@ -101,6 +116,7 @@ class CarController(CarControllerBase):
     self.apply_brake_last = 0
     self.last_pump_ts = 0.
     self.stopping_counter = 0
+    self.coast_braking = False
 
     self.accel = 0.0
     self.speed = 0.0
@@ -196,12 +212,13 @@ class CarController(CarControllerBase):
 
         if self.CP.flags & HondaFlags.BOSCH:
           self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
-          self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
+          self.gas, min_gas_accel = compute_bosch_gas(self.params, accel, CS.out.vEgo, self.coast_braking)
+          self.coast_braking = self.accel < min_gas_accel
 
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
-                                                        self.stopping_counter, self.CP))
+                                                        self.stopping_counter, self.CP, min_gas_accel))
         else:
           apply_brake = np.clip(self.brake_last - wind_brake, 0.0, 1.0)
           apply_brake = int(np.clip(apply_brake * self.params.NIDEC_BRAKE_MAX, 0, self.params.NIDEC_BRAKE_MAX - 1))
