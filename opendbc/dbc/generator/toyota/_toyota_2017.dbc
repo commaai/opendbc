@@ -107,6 +107,30 @@ BO_ 452 ENGINE_RPM: 8 CGW
  SG_ RPM : 7|16@0- (0.78125,0) [0|0] "rpm" SCS
  SG_ ENGINE_RUNNING : 27|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 464 ECT1F03: 8 CGW
+ SG_ NT : 7|16@0- (0.390625,0) [0|0] "rpm" Vector__XXX
+ SG_ ACT : 23|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ XDMET : 20|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ XNTSW : 19|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ XNMET : 18|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ XRMET : 17|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ XPMET : 16|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ SFTOUT_S : 29|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ X3MET : 26|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ X2MET : 25|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ XLOMET : 24|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ L4SW : 38|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ SNOW : 36|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ XFSFT : 35|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ SFTOUT : 34|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ HSSLWN : 55|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ HSINH : 54|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ CLTMODBK : 53|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ LUOUT : 51|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ LUKG : 50|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ FBCOA : 48|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ECTF03SM : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
 BO_ 467 PCM_CRUISE_2: 8 XXX
  SG_ BRAKE_PRESSED : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ PCM_FOLLOW_DISTANCE : 12|2@0+ (1,0) [0|3] "" XXX
@@ -123,6 +147,18 @@ BO_ 552 VSC1S29: 4 CGW
 
 BO_ 560 BRAKE_2: 7 XXX
  SG_ BRAKE_PRESSED : 26|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 562 VSC1S14: 6 CGW
+ SG_ VWPSUMFR : 7|8@0+ (1,0) [0|0] "" MAV
+ SG_ VWPSUMFL : 15|8@0+ (1,0) [0|0] "" MAV
+ SG_ VWPFRPM : 23|1@0+ (1,0) [0|0] "" MAV
+ SG_ VWPFLPM : 22|1@0+ (1,0) [0|0] "" MAV
+ SG_ S14CNT : 21|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ VWPFRPMS : 18|1@0+ (1,0) [0|0] "" MAV
+ SG_ VWPFLPMS : 17|1@0+ (1,0) [0|0] "" MAV
+ SG_ VWPSUMRR : 31|8@0+ (1,0) [0|0] "" MAV
+ SG_ VWPSUMRL : 39|8@0+ (1,0) [0|0] "" MAV
+ SG_ VSC14SUM : 47|8@0+ (1,0) [0|0] "" MAV
 
 BO_ 581 GAS_PEDAL_HYBRID: 8 XXX
  SG_ GAS_PEDAL : 23|8@0+ (0.005,0) [0|1] "" XXX
@@ -245,6 +281,20 @@ BO_ 1009 PCM_CRUISE_ALT: 8 XXX
  SG_ MAIN_ON : 13|1@0+ (1,0) [0|3] "" XXX
  SG_ CRUISE_STATE : 10|1@0+ (1,0) [0|1] "" XXX
  SG_ UI_SET_SPEED : 23|8@0+ (1,0) [0|255] "mph" XXX
+
+BO_ 1017 ENG1F03: 8 CGW
+ SG_ VARENG1 : 7|4@0+ (1,0) [0|0] "" AFS,SCS
+ SG_ VARENG2 : 3|4@0+ (1,0) [0|0] "" AFS,SCS
+ SG_ VARENG3 : 15|4@0+ (1,0) [0|0] "" AFS,SCS
+ SG_ VARENG4 : 11|1@0+ (1,0) [0|0] "" AFS,SCS
+ SG_ HVFLAG : 10|1@0+ (1,0) [0|0] "" AFS,BSR,FCM,SCS
+ SG_ VARTRM1 : 23|4@0+ (1,0) [0|0] "" AFS,CSR,FCM,MAV,SCS
+ SG_ GEARINF : 19|4@0+ (1,0) [0|0] "" SCS
+ SG_ DVINF : 31|2@0+ (1,0) [0|0] "" AFS,DS1,FCM,SCS
+ SG_ OBDINF : 27|4@0+ (1,0) [0|0] "" BSR,DS1,FCM,SCS
+ SG_ ECOFLAG : 39|1@0+ (1,0) [0|0] "" FCM
+ SG_ CDYMD : 38|2@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ ENGF03SM : 63|8@0+ (1,0) [0|0] "" DS1,FCM,MAV
 
 BO_ 1020 SOLAR_SENSOR: 8 XXX
  SG_ LUX_SENSOR : 55|13@0+ (1,0) [0|0] "" XXX
@@ -431,6 +481,12 @@ BO_ 1592 DOOR_LOCKS: 8 XXX
  SG_ LOCK_STATUS : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ LOCKED_VIA_KEYFOB : 23|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1595 BDB1F03: 8 CGW
+ SG_ BDBF03ID : 7|8@0+ (1,0) [0|0] "" DS1,FCM,MAV
+ SG_ BDBF03IF : 15|8@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ TRIP_CNT : 23|16@0+ (1,0) [0|0] "trip" AFS,BSR,CSR,DS1,FCM,MAV
+ SG_ TIME_CNT : 39|32@0+ (100,0) [0|0] "ms" AFS,BSR,CSR,DS1,FCM,MAV
+
 BO_ 1779 ADAS_TOGGLE_STATE: 8 XXX
  SG_ OK_BUTTON_PRESSED : 15|1@0+ (1,0) [0|1] "" BCM
  SG_ SWS_TOGGLE_CMD : 24|1@0+ (1,0) [0|1] "" XXX
@@ -452,10 +508,16 @@ CM_ SG_ 37 STEER_RATE "factor is tbd";
 CM_ SG_ 119 FDRVREAL "ICE only: force applied by wheels from the engine. includes creeping force, regen, and engine braking";
 CM_ SG_ 166 BRAKE_FORCE "hybrid only: force applied by friction brakes from user or ACC command";
 CM_ SG_ 295 FDRVREAL "hybrid only: force applied by wheels from the engine and/or electric motors. includes creeping force, regen, and engine braking";
+CM_ SG_ 464 NT "ICE only: turbine (input shaft) speed";
+CM_ SG_ 464 ACT "1 while a shift is in progress";
+CM_ SG_ 464 XDMET "XPMET, XRMET, XNMET and XDMET are P, R, N and D";
+CM_ SG_ 464 SFTOUT "Target gear minus one on stepped automatics, changes before the shift starts";
+CM_ SG_ 464 LUKG "Torque converter lock-up: 0 open, 1 slip control, 2 locked";
 CM_ SG_ 467 ACC_FAULTED "1 when ACC is faulted and the PCM disallows engagement";
 CM_ SG_ 467 SET_SPEED "43 km/h are shown as 28 mph, so conversion isn't perfect";
 CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disengage below 28mph";
 CM_ SG_ 560 BRAKE_PRESSED "another brake pressed?";
+CM_ SG_ 562 VWPSUMFR "Wheel speed sensor pulse counters, wrap at 256 and start counting before WHEEL_SPEEDS leaves 0";
 CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 CM_ SG_ 608 STEER_TORQUE_DRIVER "driver torque";
 CM_ SG_ 608 STEER_OVERRIDE "set when driver torque exceeds a certain value";
@@ -480,6 +542,7 @@ CM_ SG_ 921 TEMP_ACC_FAULTED "1 when the UI is displaying or playing fault-relat
 CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
 CM_ SG_ 956 GEAR "on 6MT, only R shows.";
 CM_ SG_ 1009 UI_SET_SPEED "units seem to be whatever the car is set to";
+CM_ SG_ 1017 HVFLAG "1 on hybrids";
 CM_ SG_ 1041 PCS_INDICATOR "Pre-Collision System Indicator";
 CM_ SG_ 1041 PCS_SENSITIVITY "Pre-Collision System Sensitivity";
 CM_ SG_ 1041 PCS_DUST "alert: Front Camera Low Visibility Unavailable See Owner's Manual";
@@ -525,6 +588,8 @@ CM_ SG_ 1553 ODOMETER "Unit is dependent upon units signal";
 CM_ SG_ 1592 LOCK_STATUS_CHANGED "1 on rising edge of lock/unlocking";
 CM_ SG_ 1592 LOCK_STATUS "The next 3 bits always seem to follow this signal.";
 CM_ SG_ 1592 LOCKED_VIA_KEYFOB "1 for as long as car is locked with key fob or door handle touch";
+CM_ SG_ 1595 TRIP_CNT "Ignition cycle counter";
+CM_ SG_ 1595 TIME_CNT "Time since ignition on. Runs about 9% slow on the Camry";
 
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok";
