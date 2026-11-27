@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAFETY_MODES_VOLKSWAGEN_MQB_H
+#define SAFETY_MODES_VOLKSWAGEN_MQB_H
 
 #include "opendbc/safety/declarations.h"
 #include "opendbc/safety/modes/volkswagen_common.h"
@@ -48,14 +49,13 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
 static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
   // Update in-motion state by sampling wheel speeds
   if (msg_matches(msg, MSG_ESP_19, 0U)) {
-    // sum 4 wheel speeds
-    int speed = 0;
-    for (uint8_t i = 0U; i < 8U; i += 2U) {
-      int wheel_speed = msg->data[i] | (msg->data[i + 1U] << 8);
-      speed += wheel_speed;
-    }
     // Check all wheel speeds for any movement
-    safety.vehicle_moving = speed > 0;
+    // Signals: ESP_19.ESP_[HL|HR|VL|VR]_Radgeschw_02
+    uint32_t hl = GET_BYTES_LE(msg, 0, 2);
+    uint32_t hr = GET_BYTES_LE(msg, 2, 2);
+    uint32_t vl = GET_BYTES_LE(msg, 4, 2);
+    uint32_t vr = GET_BYTES_LE(msg, 6, 2);
+    safety.vehicle_moving = (hl | hr | vl | vr) != 0U;
   }
 
   // Update driver input torque samples
@@ -66,20 +66,8 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg_matches(msg, MSG_TSK_06, 0U)) {
-    // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
-    // Always exit controls on main switch off
-    // Signal: TSK_06.TSK_Status
-    int acc_status = (msg->data[3] & 0x7U);
-    bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-    safety.acc_main_on = cruise_engaged || (acc_status == 2);
-
-    if (!safety_setup.volkswagen_longitudinal) {
-      pcm_cruise_check(cruise_engaged);
-    }
-
-    if (!safety.acc_main_on) {
-      safety.controls_allowed = false;
-    }
+    uint8_t tsk_status = msg->data[3] & 0x7U;
+    volkswagen_tsk_status_check((int)tsk_status, !safety_setup.volkswagen_longitudinal);
   }
 
   if (msg_matches(msg, MSG_GRA_ACC_01, 0U)) {
@@ -87,18 +75,12 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // Signal: GRA_ACC_01.GRA_Tip_Setzen
     // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
     if (safety_setup.volkswagen_longitudinal) {
-      bool set_button = GET_BIT(msg, 16U);
-      bool resume_button = GET_BIT(msg, 19U);
-      if ((safety.volkswagen_set_button_prev && !set_button) || (safety.volkswagen_resume_button_prev && !resume_button)) {
-        safety.controls_allowed = safety.acc_main_on;
-      }
-      safety.volkswagen_set_button_prev = set_button;
-      safety.volkswagen_resume_button_prev = resume_button;
+      volkswagen_set_resume_check(GET_BIT(msg, 16U), GET_BIT(msg, 19U));
     }
     // Always exit controls on rising edge of Cancel
     // Signal: GRA_ACC_01.GRA_Abbrechen
     if (GET_BIT(msg, 13U)) {
-      safety.controls_allowed = false;
+      exit_controls();
     }
   }
 
@@ -160,16 +142,17 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
 
     if (msg->addr == MSG_ACC_06) {
       // Signal: ACC_06.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-      desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
+      desired_accel = from_offset((GET_BYTES_LE(msg, 3, 2) & 0x7FFU) * 5U, 7220);
     } else {
       // Signal: ACC_07.ACC_Folgebeschl (acceleration in m/s2, scale 0.03, offset -4.6)
-      int secondary_accel = (msg->data[4] * 30U) - 4600U;
-      violation |= (secondary_accel != 3020);  // enforce always inactive (one increment above max range) at this time
+      int secondary_accel = ((int)msg->data[4] * 30) - 4600;
+      violation = (secondary_accel != 3020);  // enforce always inactive (one increment above max range) at this time
       // Signal: ACC_07.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-      desired_accel = (((msg->data[7] << 3) | ((msg->data[6] & 0xE0U) >> 5)) * 5U) - 7220U;
+      desired_accel = from_offset(((GET_BYTES_LE(msg, 6, 2) >> 5) & 0x7FFU) * 5U, 7220);
     }
 
-    violation |= longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MQB_LONG_LIMITS);
+    const bool accel_violation = longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MQB_LONG_LIMITS);
+    violation = violation || accel_violation;
 
     if (violation) {
       tx = false;
@@ -188,7 +171,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-const safety_hooks volkswagen_mqb_hooks = {
+static const safety_hooks volkswagen_mqb_hooks = {
   .init = volkswagen_mqb_init,
   .rx = volkswagen_mqb_rx_hook,
   .tx = volkswagen_mqb_tx_hook,
@@ -196,3 +179,5 @@ const safety_hooks volkswagen_mqb_hooks = {
   .get_checksum = volkswagen_mxb_get_checksum,
   .compute_checksum = volkswagen_mxb_compute_crc,
 };
+
+#endif  // SAFETY_MODES_VOLKSWAGEN_MQB_H

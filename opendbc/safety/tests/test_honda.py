@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import unittest
 import numpy as np
+from collections.abc import Callable
 
 from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
-from opendbc.safety.tests.common import MAX_WRONG_COUNTERS
 
 HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 
@@ -29,6 +29,8 @@ class Btn:
 
 
 class HondaButtonEnableBase(common.CarSafetyTest):
+  _acc_state_msg: Callable[..., libsafety_py.CANPacket]
+  _button_msg: Callable[..., libsafety_py.CANPacket]
 
   # override these inherited tests since we're using button enable
   def test_disable_control_allowed_from_cruise(self):
@@ -79,62 +81,10 @@ class HondaButtonEnableBase(common.CarSafetyTest):
       self._rx(self._button_msg(btn, main_on=True))
       self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_disengage_on_main(self):
-    self.safety.set_controls_allowed(1)
-    self._rx(self._acc_state_msg(True))
-    self.assertTrue(self.safety.get_controls_allowed())
-    self._rx(self._acc_state_msg(False))
-    self.assertFalse(self.safety.get_controls_allowed())
-
-  def test_rx_hook(self):
-
-    # TODO: move this test to common
-    # checksum checks
-    for msg_type in ["btn", "gas", "speed"]:
-      self.safety.set_controls_allowed(1)
-      if msg_type == "btn":
-        msg = self._button_msg(Btn.SET)
-      if msg_type == "gas":
-        msg = self._user_gas_msg(0)
-      if msg_type == "speed":
-        msg = self._speed_msg(0)
-      self.assertTrue(self._rx(msg))
-      if msg_type != "btn":
-        msg[0].data[4] = 0  # invalidate checksum
-        msg[0].data[5] = 0
-        msg[0].data[6] = 0
-        msg[0].data[7] = 0
-        self.assertFalse(self._rx(msg))
-        self.assertFalse(self.safety.get_controls_allowed())
-
-    # counter
-    # Skip every other counter to trigger counter faults.
-    for i in range(MAX_WRONG_COUNTERS + 1):
-      self._speed_msg(0)
-      self._button_msg(Btn.SET)
-      self._user_gas_msg(0)
-      if i < MAX_WRONG_COUNTERS:
-        self.safety.set_controls_allowed(1)
-        self._rx(self._button_msg(Btn.SET))
-        self._rx(self._speed_msg(0))
-        self._rx(self._user_gas_msg(0))
-      else:
-        self.assertFalse(self._rx(self._button_msg(Btn.SET)))
-        self.assertFalse(self._rx(self._speed_msg(0)))
-        self.assertFalse(self._rx(self._user_gas_msg(0)))
-        self.assertFalse(self.safety.get_controls_allowed())
-
-    # restore counters for future tests with a couple of good messages
-    for _ in range(2):
-      self.safety.set_controls_allowed(1)
-      self._rx(self._button_msg(Btn.SET, main_on=True))
-      self._rx(self._speed_msg(0))
-      self._rx(self._user_gas_msg(0))
-    self._rx(self._button_msg(Btn.SET, main_on=True))
-    self.assertTrue(self.safety.get_controls_allowed())
-
 
 class HondaPcmEnableBase(common.CarSafetyTest):
+  _acc_state_msg: Callable[..., libsafety_py.CANPacket]
+  _button_msg: Callable[..., libsafety_py.CANPacket]
 
   def test_buttons(self):
     """
@@ -163,9 +113,9 @@ class HondaPcmEnableBase(common.CarSafetyTest):
 
 class HondaBase(common.CarSafetyTest):
   MAX_BRAKE = 255
-  PT_BUS: int | None = None  # must be set when inherited
-  STEER_BUS: int | None = None  # must be set when inherited
-  BUTTONS_BUS: int | None = None  # must be set when inherited, tx on this bus, rx on PT_BUS
+  PT_BUS: int  # must be set when inherited
+  STEER_BUS: int  # must be set when inherited
+  BUTTONS_BUS: int  # must be set when inherited, tx on this bus, rx on PT_BUS
 
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194)}  # STEERING_CONTROL
 
@@ -212,19 +162,30 @@ class HondaBase(common.CarSafetyTest):
     values = {"STEER_TORQUE": steer}
     return self.packer.make_can_msg_safety("STEERING_CONTROL", self.STEER_BUS, values)
 
-  def _send_brake_msg(self, brake):
-    # must be implemented when inherited
-    raise NotImplementedError
-
-  def test_disengage_on_brake(self):
+  def test_disengage_on_main(self):
     self.safety.set_controls_allowed(1)
-    self._rx(self._user_brake_msg(1))
+    self._rx(self._acc_state_msg(True))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self._rx(self._acc_state_msg(False))
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_steer_safety_check(self):
-    self.safety.set_controls_allowed(0)
-    self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
-    self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
+    for controls_allowed in (False, True):
+      self.safety.set_controls_allowed(controls_allowed)
+      self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
+      self.assertEqual(controls_allowed, self._tx(self._send_steer_msg(0x1000)))
+      self.assertEqual(controls_allowed, self._tx(self._send_steer_msg(1)))
+
+  def test_vehicle_moving(self):
+    # XMISSION_SPEED is 0.01 kph per bit: 0.01 sets only the low byte, 2.56 only the high byte
+    for speed in (0.01, 2.56):
+      # a brake press that was already pressed only disengages while moving
+      self._rx(self._speed_msg(0))
+      self._rx(self._user_brake_msg(1))
+      self.safety.set_controls_allowed(1)
+      self._rx(self._speed_msg(speed))
+      self._rx(self._user_brake_msg(1))
+      self.assertFalse(self.safety.get_controls_allowed())
 
 
 # ********************* Honda Nidec **********************
@@ -255,6 +216,18 @@ class TestHondaNidecSafetyBase(HondaBase):
     # Used to control ACC on Nidec without pedal
     values = {"PCM_GAS": pcm_gas, "PCM_SPEED": pcm_speed}
     return self.packer.make_can_msg_safety("ACC_HUD", 0, values)
+
+  def test_alt_steer_safety_check(self):
+    # CR-V and RDX steer with 0x194
+    self.safety.set_controls_allowed(False)
+    self.assertFalse(self._tx(common.make_msg(0, 0x194, dat=b'\x10\x00\x00\x00')))
+
+  def test_brake_switch_debounce(self):
+    # brake switch alone counts as brake pressed once set for two frames
+    self._rx(self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, {"BRAKE_SWITCH": 1}))
+    self.assertFalse(self.safety.get_brake_pressed_prev())
+    self._rx(self.packer.make_can_msg_safety("POWERTRAIN_DATA", self.PT_BUS, {"BRAKE_SWITCH": 1}))
+    self.assertTrue(self.safety.get_brake_pressed_prev())
 
   def test_acc_hud_safety_check(self):
     for controls_allowed in [True, False]:
@@ -370,9 +343,6 @@ class TestHondaBoschSafetyBase(HondaBase):
     values = {"BRAKE_PRESSED": brake}
     return self.packer.make_can_msg_safety("BRAKE_MODULE", self.PT_BUS, values)
 
-  def _send_brake_msg(self, brake):
-    pass
-
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._button_msg(Btn.CANCEL, bus=self.BUTTONS_BUS)))
@@ -417,6 +387,9 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
   """
     Covers the Honda Bosch safety mode with stock longitudinal
   """
+
+  def test_supplemental_control(self):
+    self.assertTrue(self._tx(common.make_msg(0, 0xE5, dat=(0x10800004).to_bytes(8, "little"))))
 
 
 class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):

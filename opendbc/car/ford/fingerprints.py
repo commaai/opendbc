@@ -1,10 +1,11 @@
 """ AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, EDIT STRUCTURE THERE."""
 from opendbc.car.structs import CarParams
+from opendbc.car.fw_query_definitions import OfflineFwVersions
 from opendbc.car.ford.values import CAR
 
 Ecu = CarParams.Ecu
 
-FW_VERSIONS = {
+FW_VERSIONS: OfflineFwVersions = {
   CAR.FORD_BRONCO_SPORT_MK1: {
     (Ecu.eps, 0x730, None): [
       b'LX6C-14D003-AH\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',

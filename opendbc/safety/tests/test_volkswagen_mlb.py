@@ -88,7 +88,6 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
 
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LS_01, 0], [MSG_LS_01, 2]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_01, MSG_LDW_02]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
@@ -99,10 +98,18 @@ class TestVolkswagenMlbStockSafety(TestVolkswagenMlbSafetyBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._ls_01_msg(resume=1)))
 
+  def test_cruise_states(self):
+    for state in range(4):
+      self._rx(self._tsk_status_msg(False))
+      self._rx(self.packer.make_can_msg_safety("TSK_04", 1, {"TSK_Status_GRA_ACC_02": state}))
+      self.assertEqual(state in (1, 2), self.safety.get_controls_allowed())
+
   def test_cancel_button(self):
     # Disable on rising edge of cancel button
     self._rx(self._tsk_status_msg(False))
     self.safety.set_controls_allowed(1)
+    self._rx(self._ls_01_msg(bus=0))
+    self.assertTrue(self.safety.get_controls_allowed())
     self._rx(self._ls_01_msg(cancel=True, bus=0))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 

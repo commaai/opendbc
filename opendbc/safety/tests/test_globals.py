@@ -31,6 +31,15 @@ class TestGlobals(unittest.TestCase):
         writable = {n.removeprefix("_") for n in names if not n.startswith("ltmp")}
         self.assertEqual(writable, {"safety_a", "safety_b", "current_copy", "safety_ts", "safety_redundancy_fault"})
 
+  # only enter_controls() and exit_controls() write controls_allowed, so every engagement resets the heartbeat mismatches
+  def test_controls_allowed_writes(self):
+    writes = {}
+    for f in (ROOT / "opendbc/safety").rglob("*.[ch]"):
+      n = len(re.findall(r"controls_allowed\s*[|&^]?=(?!=)", f.read_text()))
+      if n and "tests" not in f.parts:
+        writes[f.name] = n
+    self.assertEqual(writes, {"safety.h": 2})
+
 
 if __name__ == "__main__":
   unittest.main()

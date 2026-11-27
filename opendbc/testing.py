@@ -153,7 +153,7 @@ def parameterized(argnames, argvalues):
   return decorator
 
 
-def parameterized_class(attrs, values=None):
+def parameterized_class(attrs, values=()):
   """Class decorator that generates subclasses with different class attributes.
 
   Usage:

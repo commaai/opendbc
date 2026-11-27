@@ -36,28 +36,16 @@ def create_radar_can_parser(car_fingerprint):
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
-
     self.rcp = None if CP.radarUnavailable else create_radar_can_parser(CP.carFingerprint)
-
     self.trigger_msg = LAST_RADAR_MSG
-    self.updated_messages = set()
 
-  def update(self, can_strings):
-    if self.rcp is None:
-      return super().update(None)
-
-    vls = self.rcp.update(can_strings)
-    self.updated_messages.update(vls)
-
-    if self.trigger_msg not in self.updated_messages:
-      return None
-
+  def _update(self, rcp, updated_messages):
     ret = structs.RadarData()
-    header = self.rcp.vl[RADAR_HEADER_MSG]
+    header = rcp.vl[RADAR_HEADER_MSG]
     fault = header['FLRRSnsrBlckd'] or header['FLRRSnstvFltPrsntInt'] or \
       header['FLRRYawRtPlsblityFlt'] or header['FLRRHWFltPrsntInt'] or \
       header['FLRRAntTngFltPrsnt'] or header['FLRRAlgnFltPrsnt']
-    if not self.rcp.can_valid:
+    if not rcp.can_valid:
       ret.errors.canError = True
     if fault:
       ret.errors.radarFault = True
@@ -66,18 +54,18 @@ class RadarInterface(RadarInterfaceBase):
     num_targets = header['FLRRNumValidTargets']
 
     # Not all radar messages describe targets,
-    # no need to monitor all of the self.rcp.msgs_upd
-    for ii in self.updated_messages:
+    # no need to monitor all of the rcp.msgs_upd
+    for ii in updated_messages:
       if ii == RADAR_HEADER_MSG:
         continue
 
       if num_targets == 0:
         break
 
-      cpt = self.rcp.vl[ii]
+      cpt = rcp.vl[ii]
       # Zero distance means it's an empty target slot
       if cpt['TrkRange'] > 0.0:
-        targetId = cpt['TrkObjectID']
+        targetId = int(cpt['TrkObjectID'])
         currentTargets.add(targetId)
         if targetId not in self.pts:
           self.pts[targetId] = structs.RadarData.RadarPoint()
@@ -93,5 +81,4 @@ class RadarInterface(RadarInterfaceBase):
         del self.pts[oldTarget]
 
     ret.points = list(self.pts.values())
-    self.updated_messages.clear()
     return ret

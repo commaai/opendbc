@@ -9,7 +9,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANDefine
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import MAX_WRONG_COUNTERS, away_round, round_speed, speeds_within_delta
+from opendbc.safety.tests.common import away_round, round_speed, speeds_within_delta
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
@@ -23,9 +23,12 @@ def round_angle(apply_angle, can_offset=0):
   return away_round(apply_angle_can + rnd_offset) * 0.1 - 1638.35
 
 
+TESLA_DBC = "tesla_model3_party"
+
+
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
 
-  DBC = "tesla_model3_party"
+  DBC = TESLA_DBC
   SAFETY_MODEL = CarParams.SafetyModel.tesla
 
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor)}
@@ -33,7 +36,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   TX_MSGS = [[MSG_DAS_steeringControl, 0], [MSG_APS_eacMonitor, 0], [MSG_DAS_Control, 0]]
 
   STANDSTILL_THRESHOLD = 0.1
-  GAS_PRESSED_THRESHOLD = 3
 
   # Angle control limits
   STEER_ANGLE_MAX = 360  # deg
@@ -55,7 +57,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
   def setUp(self):
     super().setUp()
     self.VM = VehicleModel(get_safety_CP())
-    self.define = CANDefine(self.DBC)
+    self.define = CANDefine(TESLA_DBC)
     self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
     self.autopark_states = {d: v for v, d in self.define.dv["DI_state"]["DI_autoparkState"].items()}
     self.active_autopark_states = [self.autopark_states[s] for s in ('ACTIVE', 'COMPLETE', 'SELFPARK_STARTED')]
@@ -74,23 +76,26 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
               "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code}
     return self.packer.make_can_msg_safety("EPAS3S_sysStatus", 0, values)
 
-  def _user_brake_msg(self, brake, status: int | None = None):
-    if status is None:
-      status = 2 if brake else 1
-    values = {"ESP_driverBrakeApply": status}
+  def _user_brake_msg(self, brake):
+    values = {"ESP_driverBrakeApply": 2 if brake else 1}
     return self.packer.make_can_msg_safety("ESP_status", 0, values)
+
+  # ESP_driverBrakeApply 0 is NotInit_orOff, 3 is Faulty_SNA
+  RX_QUALITY_FLAGS = {
+    "ESP_B": {"ESP_wheelSpeedsQF": (1,)},
+    "ESP_status": {"ESP_driverBrakeApply": (1, 2)},
+  }
 
   def _speed_msg(self, speed):
     values = {"DI_vehicleSpeed": speed * 3.6}
     return self.packer.make_can_msg_safety("DI_speed", 0, values)
 
-  def _speed_msg_2(self, speed, quality_flag=True):
-    values = {"ESP_vehicleSpeed": speed * 3.6, "ESP_wheelSpeedsQF": quality_flag}
+  def _speed_msg_2(self, speed):
+    values = {"ESP_vehicleSpeed": speed * 3.6, "ESP_wheelSpeedsQF": 1}
     return self.packer.make_can_msg_safety("ESP_B", 0, values)
 
-  def _vehicle_moving_msg(self, speed: float, quality_flag=True):
-    values = {"ESP_vehicleStandstillSts": 1 if speed <= self.STANDSTILL_THRESHOLD else 0,
-              "ESP_wheelSpeedsQF": quality_flag}
+  def _vehicle_moving_msg(self, speed: float):
+    values = {"ESP_vehicleStandstillSts": 1 if speed <= self.STANDSTILL_THRESHOLD else 0, "ESP_wheelSpeedsQF": 1}
     return self.packer.make_can_msg_safety("ESP_B", 0, values)
 
   def _user_gas_msg(self, gas):
@@ -120,42 +125,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
     # For common.LongitudinalAccelSafetyTest
     return self._long_control_msg(10, accel_limits=(accel, max(accel, 0)))
 
-  def test_rx_hook(self):
-    # counter check
-    for msg_type in ("angle", "long", "speed", "speed_2"):
-      # send multiple times to verify counter checks
-      for i in range(10):
-        if msg_type == "angle":
-          msg = self._angle_cmd_msg(0, True, bus=2)
-        elif msg_type == "long":
-          msg = self._long_control_msg(0, bus=2)
-        elif msg_type == "speed":
-          msg = self._speed_msg(0)
-        elif msg_type == "speed_2":
-          msg = self._speed_msg_2(0)
-
-        should_rx = i >= 5
-        if not should_rx:
-          # mess with checksums
-          if msg_type == "angle":
-            msg[0].data[3] = 0
-          elif msg_type == "long":
-            msg[0].data[7] = 0
-          elif msg_type == "speed":
-            msg[0].data[0] = 0
-          elif msg_type == "speed_2":
-            msg[0].data[7] = 0
-
-        self.safety.set_controls_allowed(True)
-        self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
-
-      # Send static counters
-      for i in range(MAX_WRONG_COUNTERS + 1):
-        should_rx = i + 1 < MAX_WRONG_COUNTERS
-        self.assertEqual(should_rx, self._rx(msg))
-        self.assertEqual(should_rx, self.safety.get_controls_allowed())
-
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,
@@ -179,20 +148,6 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
         within_delta = speeds_within_delta(speed, speed_2)
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
-    # Test ESP_B quality flag
-    for quality_flag in (True, False):
-      self.safety.set_controls_allowed(True)
-      self.assertTrue(self._rx(self._speed_msg(0)))
-      self.assertEqual(quality_flag, self._rx(self._speed_msg_2(0, quality_flag=quality_flag)))
-      self.assertEqual(quality_flag, self.safety.get_controls_allowed())
-
-  def test_user_brake_quality_flag(self):
-    # 0=NotInit_orOff and 3=Faulty_SNA are invalid
-    for status in range(4):
-      valid = status not in (0, 3)
-      msg = self._user_brake_msg(False, status=status)
-      self.assertEqual(valid, self._rx(msg))
-
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
     # Either when the hands on level is high, or if there is a high angle rate fault
@@ -211,6 +166,12 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
           self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=0, eac_status=1, eac_error_code=0)))
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
           self.assertFalse(self.safety.get_steering_disengage_prev())
+
+  def test_cruise_states(self):
+    for state in range(8):
+      self._rx(self._pcm_status_msg(False))
+      self._rx(self.packer.make_can_msg_safety("DI_state", 0, {"DI_cruiseState": state}))
+      self.assertEqual(state in (2, 3, 4, 6, 7), self.safety.get_controls_allowed())
 
   def test_autopark_summon_while_enabled(self):
     # We should not respect Autopark that activates while controls are allowed
@@ -242,6 +203,7 @@ class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, 
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, True)))
       self.assertNotEqual(autopark_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
       self.assertNotEqual(autopark_active or not self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
+      self.assertEqual(0 if autopark_active else -1, self.safety.safety_fwd_hook(2, MSG_APS_eacMonitor))
 
       # Regain controls when Autopark disables
       self._rx(self._pcm_status_msg(True, 0))
@@ -432,33 +394,15 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
     self.assertFalse(self._tx(self._long_control_msg(set_speed=0, accel_limits=(-0.1, -0.1))))
 
 
-class TestTeslaIgnition(common.SafetyTestBase):
-  DBC = "tesla_model3_party"
-  SAFETY_MODEL = None
+class TestTeslaIgnition(common.CanIgnitionSafetyTest):
+  DBC = TESLA_DBC
+  IGNITION_VALUES = range(4)
+  IGNITION_ON_VALUES = {3}  # VEHICLE_POWER_STATE_DRIVE
+  IGNITION_COUNTER_MOD = 16
 
-  TX_MSGS: list = []
-
-  def _msg(self, counter, state):
-    return self.packer.make_can_msg_safety("VCFRONT_LVPowerState", 0,
-                                           {"VCFRONT_LVPowerStateCounter": counter,
-                                            "VCFRONT_vehiclePowerState": state})
-
-  # VEHICLE_POWER_STATE_DRIVE=3 (counter-gated)
-  def test_ignition_on(self):
-    for i in range(16):
-      self.safety.init_tests()
-      self.safety.ignition_can_hook(self._msg(i, 3))
-      self.assertFalse(self.safety.get_ignition_can())
-      self.safety.ignition_can_hook(self._msg((i + 1) % 16, 3))
-      self.assertTrue(self.safety.get_ignition_can())
-
-  def test_ignition_off(self):
-    self.safety.ignition_can_hook(self._msg(0, 3))
-    self.safety.ignition_can_hook(self._msg(1, 3))
-    self.assertTrue(self.safety.get_ignition_can())
-    self.safety.ignition_can_hook(self._msg(2, 2))
-    self.safety.ignition_can_hook(self._msg(3, 2))
-    self.assertFalse(self.safety.get_ignition_can())
+  def _ignition_msg(self, value, counter=None, bus=0):
+    return self.packer.make_can_msg_safety("VCFRONT_LVPowerState", bus,
+                                           {"VCFRONT_LVPowerStateCounter": counter, "VCFRONT_vehiclePowerState": value})
 
 
 if __name__ == "__main__":
