@@ -114,7 +114,7 @@ class CarState(CarStateBase):
     prev_accel_button = self.accel_button
     prev_decel_button = self.decel_button
     self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]
-    self.accel_button = cp.vl["CRZ_BTNS"]["RES"]
+    self.accel_button = cp.vl["CRZ_BTNS"]["SET_P"] or cp.vl["CRZ_BTNS"]["RES"]
     self.decel_button = cp.vl["CRZ_BTNS"]["SET_M"]
 
     ret.buttonEvents = [
