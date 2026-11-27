@@ -1,0 +1,132 @@
+import re
+from dataclasses import dataclass, field
+
+from opendbc.car import Bus, CanBusBase, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car.structs import CarParams
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries
+
+Ecu = CarParams.Ecu
+
+class CarControllerParams:
+  STEER_STEP = 1
+  HUD_2_STEP = 25
+  HUD_3_STEP = 100
+
+  # Torque values are in LKA_COMMAND_2 units, 4x the LKA_COMMAND scale. Driver torque values are in EPS_2 units.
+  STEER_MAX = 1200
+  STEER_THRESHOLD = 140
+  STEER_DRIVER_ALLOWANCE = 80
+  STEER_DRIVER_MULTIPLIER = 8
+  STEER_DRIVER_FACTOR = 1  # from dbc
+  STEER_DELTA_UP = 12  # stock LKA ramps at up to 12/frame
+  STEER_DELTA_DOWN = 12
+  STEER_RELEASE_HOLD_FRAMES = 3  # frames to keep LKA_ACTIVE at zero torque before releasing
+  # Steering friction compensation added to the PID controller's output, up to the measured friction (36-44 counts).
+  # The full push is kept down to walking pace so the wheel breaks loose instead of sticking. Below ~35 mph the band
+  # widens instead, keeping the response to small angle errors near the torque controller at lateral accel factor 10
+  # (about 12-28 counts/deg), the only tune known to be calm on the van at low speed: the planner reacts to the van's
+  # motion with ~0.5 s lag, so a stiffer response risks a ~1 Hz oscillation through it.
+  # STEER_FRICTION 36-44 considered: higher means less low-speed stick-slip and tighter tracking, but more torque jitter
+  #   and low-speed gain (oscillation risk). Starting at 36; raise if stick-slip remains.
+  STEER_FRICTION = 36  # counts
+  STEER_FRICTION_FADE_BP = [1., 3.]  # m/s: full push above
+  STEER_FRICTION_BAND_BP = [5., 15.]  # m/s
+  STEER_FRICTION_BAND_V = [3.0, 1.0]  # angle error (deg) for full push
+
+  def __init__(self, CP):
+    pass
+
+
+class CanBus(CanBusBase):
+  def __init__(self, CP=None, fingerprint=None) -> None:
+    super().__init__(CP, fingerprint)
+
+  @property
+  def pt(self) -> int:
+    return self.offset
+
+  @property
+  def cam(self) -> int:
+    return self.offset + 2
+
+
+@dataclass
+class FcaAtlantisPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'fca_atlantis'})
+
+
+@dataclass(frozen=True, kw_only=True)
+class FcaAtlantisCarSpecs(CarSpecs):
+  centerToFrontRatio: float = 0.45
+  # paramsd at the configured 136" wheelbase: 159" vans learn 20.2-20.5 on highway and ~21.2 in city driving, and a 136"
+  # van learned ~18.4 in city driving, about 136/159 of the 159" value (the wheelbases share a steering rack).
+  # 17.5 sits between the 136" estimates for highway (20.3 * 136/159 = 17.4) and city (~18.2).
+  steerRatio: float = 17.5
+  # minSteerSpeed: float = 13.8 # m/s
+
+
+@dataclass
+class FcaAtlantisCarDocs(CarDocs):
+  package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
+
+
+class CAR(Platforms):
+  config: FcaAtlantisPlatformConfig
+
+  RAM_PROMASTER = FcaAtlantisPlatformConfig(
+    [FcaAtlantisCarDocs("Ram ProMaster 2022-26")],
+    # 136" wheelbase. Other wheelbases are left to paramsd, which should learn about
+    # steerRatio * 159 / 136 for a 159" (~20.5).
+    FcaAtlantisCarSpecs(wheelbase=3.45),
+  )
+
+# 0xF181 responses share one layout: 01 01, a 10-byte field, 00, then one byte.
+# EPS:   01 01 'S2FI04EB00' 00 0b
+# ABS:   01 01 18 06 01 00 '      ' 00 01
+# meter: 01 01 02 92 '        ' 00 05
+# camera: 01 01 06 00 06 20 00 03 20 00 00 01 00 26
+FW_VERSION_REGEX = br"\x01\x01[\x00-\xff]{10}\x00[\x00-\xff]"
+
+EPS_ADDR = (0x18da30f1, None)
+ABS_ADDR = (0x18da28f1, None)
+CAMERA_ADDR = (0x18da31f1, None)
+
+
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw_versions: OfflineFwVersions) -> set[str]:
+  """Allows an unseen ABS version, as long as the EPS and camera versions are known and the ABS response is well-formed.
+
+  EPS and camera versions must always be known: EPS is the ECU we command, and the camera tells vans with ADAS
+  from vans without it. ABS is likely shared with vans that lack ADAS, so it never stands in for either.
+  """
+  live_abs = live_fw_versions.get(ABS_ADDR, set())
+  if any(re.fullmatch(FW_VERSION_REGEX, v) is None for v in live_abs):
+    return set()
+
+  candidates = set()
+  for candidate, fws in offline_fw_versions.items():
+    known = {(addr, sub_addr): set(versions) for (_, addr, sub_addr), versions in fws.items()}
+    if all(live_fw_versions.get(addr, set()) & known.get(addr, set()) for addr in (EPS_ADDR, CAMERA_ADDR)):
+      candidates.add(candidate)
+  return candidates
+
+
+FW_QUERY_CONFIG = FwQueryConfig(
+  fw_version_regex=FW_VERSION_REGEX,
+  requests=[
+    Request(
+      [StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.UDS_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.eps, Ecu.abs, Ecu.fwdCamera],
+      bus=0,
+    ),
+  ],
+  # ABS was added after EPS; older logs and occasional missed responses should still match exactly.
+  # The camera stays essential, so a van without the ADAS camera doesn't fingerprint.
+  non_essential_ecus={Ecu.abs: [CAR.RAM_PROMASTER]},
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
+)
+
+
+DBC = CAR.create_dbc_map()

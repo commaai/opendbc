@@ -28,37 +28,60 @@ class TestCanChecksums(unittest.TestCase):
       with self.subTest(counter=expected[counter_field]):
         assert tested[checksum_field] == expected[checksum_field]
 
-  def verify_fca_giorgio_crc(self, msg_name: str, msg_addr: int, test_messages: list[bytes]):
-    """Test modified SAE J1850 CRCs, with special final XOR cases for EPS messages"""
+  def verify_fca_crc(self, dbc_file: str, msg_name: str, msg_addr: int, test_messages: list[bytes]):
+    """Test SAE J1850 CRCs"""
     assert len(test_messages) == 3
-    self.verify_checksum("fca_giorgio", msg_name, msg_addr, test_messages)
+    self.verify_checksum(dbc_file, msg_name, msg_addr, test_messages)
 
   def test_fca_giorgio_eps_1(self):
-    self.verify_fca_giorgio_crc("EPS_1", 0xDE, [
+    self.verify_fca_crc("fca_giorgio", "EPS_1", 0xDE, [
       b'\x17\x51\x97\xcc\x00\xdf',
       b'\x17\x51\x97\xc9\x01\xa3',
       b'\x17\x51\x97\xcc\x02\xe5',
     ])
 
   def test_fca_giorgio_eps_2(self):
-    self.verify_fca_giorgio_crc("EPS_2", 0x106, [
+    self.verify_fca_crc("fca_giorgio", "EPS_2", 0x106, [
       b'\x7c\x43\x57\x60\x00\x00\xa1',
       b'\x7c\x63\x58\xe0\x00\x01\xd5',
       b'\x7c\x63\x58\xe0\x00\x02\xf2',
     ])
 
   def test_fca_giorgio_eps_3(self):
-    self.verify_fca_giorgio_crc("EPS_3", 0x122, [
+    self.verify_fca_crc("fca_giorgio", "EPS_3", 0x122, [
       b'\x7b\x30\x00\xf8',
       b'\x7b\x10\x01\x90',
       b'\x7b\xf0\x02\x6e',
     ])
 
   def test_fca_giorgio_abs_2(self):
-    self.verify_fca_giorgio_crc("ABS_2", 0xFE, [
+    self.verify_fca_crc("fca_giorgio", "ABS_2", 0xFE, [
       b'\x7e\x38\x00\x7d\x10\x31\x80\x32',
       b'\x7e\x38\x00\x7d\x10\x31\x81\x2f',
       b'\x7e\x38\x00\x7d\x20\x31\x82\x20',
+    ])
+
+  # RAM ProMaster samples (route 57a1cc884d1e5a8b|00000003--126efcc96b)
+  def test_fca_atlantis_eps_2(self):
+    self.verify_fca_crc("fca_atlantis", "EPS_2", 0x106, [
+      b'\x00\x00\x7d\x00\x40\x00\xa8',
+      b'\x00\x00\x7c\xe0\x40\x01\xb8',
+      b'\x00\x00\x7c\xa0\x40\x02\xff',
+    ])
+
+  def test_fca_atlantis_abs_2(self):
+    self.verify_fca_crc("fca_atlantis", "ABS_2", 0xFE, [
+      b'\xad\x63\x20\x31\x50\x00\x00\xdb',
+      b'\xad\x63\x20\x31\x50\x00\x01\xc6',
+      b'\xad\x63\x20\x31\x50\x00\x02\xe1',
+    ])
+
+  def test_fca_atlantis_acc_button(self):
+    # checksum is followed by an unprotected byte
+    self.verify_fca_crc("fca_atlantis", "ACC_BUTTON", 0x2FA, [
+      b'\x00\x30\xf4\x0e',
+      b'\x80\x31\x20\x0e',
+      b'\x08\x32\x94\x0e',
     ])
 
   def test_honda_checksum(self):
