@@ -63,7 +63,7 @@ class CarState(CarStateBase):
     ret.leftBlindspot = bool(pt_cp.vl["BCM_4"]["BLIND_SPOT_LEFT"])
     ret.rightBlindspot = bool(pt_cp.vl["BCM_4"]["BLIND_SPOT_RIGHT"])
 
-    # ret.doorOpen = TODO
+    ret.doorOpen = bool(pt_cp.vl["BCM_DOORS"]["DOOR_OPEN_FL"] or pt_cp.vl["BCM_DOORS"]["DOOR_OPEN_FR"])
     ret.seatbeltUnlatched = bool(pt_cp.vl["BCM_2"]["SEATBELT_UNBUCKLED_FL"])
 
     self.frame += 1
@@ -76,6 +76,7 @@ class CarState(CarStateBase):
     pt_messages, cam_messages = [], []
     pt_messages += [
       ("BCM_4", 1),  # 1Hz, with extra frames when a signal changes
+      ("BCM_DOORS", 2),  # 2Hz, with extra frames when a door changes
       ("ENGINE_3", 1),
     ]
 
