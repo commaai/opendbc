@@ -28,8 +28,8 @@ BO_ 238 ABS_1: 8 ABS
 BO_ 250 ABS_3: 8 ABS
  SG_ BRAKE_PRESSURE_THRESHOLD : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_PEDAL_SWITCH : 3|1@0+ (1,0) [0|1] "" XXX
- SG_ RIGHT_TURN_SIGNAL : 8|1@0+ (1,0) [0|1] "" XXX
- SG_ LEFT_TURN_SIGNAL : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ RIGHT_TURN_STALK : 8|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_TURN_STALK : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 38|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -171,9 +171,9 @@ BO_ 1508 ACC_4: 8 CAMERA
  SG_ CRUISE_MODE : 61|3@0+ (1,0) [0|3] "" XXX
 
 BO_ 1854 BCM_1: 4 BCM
- SG_ RIGHT_TURN_STALK : 16|1@0+ (1,0) [0|1] "" XXX
- SG_ LEFT_TURN_STALK : 17|1@0+ (1,0) [0|1] "" XXX
- SG_ MAYBE_BRAKE_LIGHT : 18|1@0+ (1,0) [0|1] "" XXX
+ SG_ RIGHT_BLINKER : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_BLINKER : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_LIGHT : 18|1@0+ (1,0) [0|1] "" XXX
 
 CM_ SG_ 220 ACCEL_PEDAL_USER "driver pedal only";
 CM_ SG_ 252 ACCEL_PEDAL_COMBO "driver pedal and ACC demand combined";

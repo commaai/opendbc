@@ -54,8 +54,8 @@ class CarState(CarStateBase):
     ret.cruiseState.available = pt_cam.vl["ACC_4"]["CRUISE_MODE"] == 2 or ret.cruiseState.enabled
     ret.cruiseState.speed = pt_cam.vl["ACC_4"]["ACC_SET_SPEED_KPH"] * CV.KPH_TO_MS
 
-    ret.leftBlinker = bool(pt_cp.vl["BCM_1"]["LEFT_TURN_STALK"])
-    ret.rightBlinker = bool(pt_cp.vl["BCM_1"]["RIGHT_TURN_STALK"])
+    ret.leftBlinker = bool(pt_cp.vl["BCM_1"]["LEFT_BLINKER"])
+    ret.rightBlinker = bool(pt_cp.vl["BCM_1"]["RIGHT_BLINKER"])
     # ret.buttonEvents = TODO
     self.button_counter = pt_cp.vl["ACC_BUTTON"]["COUNTER"]
     # ret.espDisabled = TODO
