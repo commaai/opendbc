@@ -1,9 +1,11 @@
 import unittest
 
-from opendbc.car import Bus
+from opendbc.car import Bus, gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
+from opendbc.car.interfaces import get_torque_params
 from opendbc.car.toyota.fingerprints import FW_VERSIONS
+from opendbc.car.toyota.interface import CarInterface
 from opendbc.car.toyota.values import CAR, DBC, ToyotaFlags, FW_QUERY_CONFIG, PLATFORM_CODE_ECUS, \
                                                   FUZZY_EXCLUDED_PLATFORMS, get_platform_codes, match_fw_to_car_fuzzy
 from opendbc.testing import fuzzy_test
@@ -21,6 +23,28 @@ def cars_with(flags):
 
 
 class TestToyotaInterfaces(unittest.TestCase):
+  def test_rav4_tss2_0r_torque_tune(self):
+    rav4 = CAR.TOYOTA_RAV4_TSS2
+    fw_0r = b'\x02' + b'8965B0R01300'.ljust(16, b'\x00') + b'8965B0R02300'.ljust(16, b'\x00')
+    eps_0r = CarParams.CarFw(ecu=Ecu.eps, fwVersion=fw_0r)
+    eps_42 = CarParams.CarFw(ecu=Ecu.eps, fwVersion=b'8965B42171'.ljust(16, b'\x00'))
+    camera = CarParams.CarFw(ecu=Ecu.fwdCamera, fwVersion=fw_0r)
+    for platform, firmware, expected in (
+      (rav4, [eps_0r], (2.22299, 0.11273)),
+      (rav4, [eps_42], None),
+      (rav4, [eps_0r, eps_42], None),
+      (rav4, [camera], None),
+      (rav4, [], None),
+      (CAR.TOYOTA_RAV4_TSS2_2022, [eps_0r], None),
+    ):
+      with self.subTest(platform=platform, firmware=firmware):
+        tune = CarInterface.get_params(platform, gen_empty_fingerprint(), firmware, False, True, False).lateralTuning.torque
+        if expected is None:
+          default = get_torque_params()[platform]
+          expected = default['LAT_ACCEL_FACTOR'], default['FRICTION']
+        self.assertAlmostEqual(tune.latAccelFactor, expected[0], places=6)
+        self.assertAlmostEqual(tune.friction, expected[1], places=6)
+
   def test_car_flags(self):
     # Angle and radar-ACC cars are always TSS2 cars
     assert not (cars_with(ToyotaFlags.ANGLE_CONTROL | ToyotaFlags.RADAR_ACC) - cars_with(ToyotaFlags.TSS2))

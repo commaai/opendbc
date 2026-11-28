@@ -3,7 +3,7 @@ from opendbc.car.toyota.carstate import CarState
 from opendbc.car.toyota.carcontroller import CarController
 from opendbc.car.toyota.radar_interface import RadarInterface
 from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, MIN_ACC_SPEED, \
-                                                  EPS_SCALE, ToyotaSafetyFlags
+                                                  EPS_SCALE, ToyotaSafetyFlags, get_platform_codes
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
 
@@ -67,6 +67,13 @@ class CarInterface(CarInterfaceBase):
         # 2021+ TSS2 steering rack swapped into a TSS-P car, not supported
         if fw.ecu == "eps" and fw.fwVersion == b'8965B47070\x00\x00\x00\x00\x00\x00':
           ret.dashcamOnly = True
+
+    elif candidate == CAR.TOYOTA_RAV4_TSS2:
+      eps_versions = [fw.fwVersion for fw in car_fw if fw.ecu == Ecu.eps]
+      if get_platform_codes(eps_versions).keys() == {b'8965B-0R-01'}:
+        # Median torque calibration for this EPS family, weighted equally per dongle.
+        ret.lateralTuning.torque.latAccelFactor = 2.22299
+        ret.lateralTuning.torque.friction = 0.11273
 
     elif candidate in (CAR.LEXUS_RX, CAR.LEXUS_RX_TSS2):
       stop_and_go = True
