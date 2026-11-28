@@ -831,6 +831,7 @@ FW_VERSIONS = {
   },
   CAR.KIA_SELTOS: {
     (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00SP2_ SCC F-CUP      1.00 1.01 99110-Q5500         ',
       b'\xf1\x00SP2_ SCC FHCUP      1.01 1.05 99110-Q5100         ',
     ],
     (Ecu.abs, 0x7d1, None): [
@@ -839,9 +840,11 @@ FW_VERSIONS = {
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00SP2 MDPS C 1.00 1.04 56300Q5200          ',
+      b'\xf1\x00SP2 MDPS C 1.00 1.04 56310Q5840  4SPSC104',
       b'\xf1\x00SP2 MDPS C 1.01 1.05 56300Q5200          ',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00SP2 MFC  AT AUS RHD 1.00 1.03 99210-Q5500 230208',
       b'\xf1\x00SP2 MFC  AT USA LHD 1.00 1.04 99210-Q5000 191114',
       b'\xf1\x00SP2 MFC  AT USA LHD 1.00 1.05 99210-Q5000 201012',
     ],
