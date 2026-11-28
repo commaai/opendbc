@@ -98,12 +98,10 @@ class MebLongStateMachine:
     # warning: car is reacting to hold mechanic even with long control off
     # HALTEN -> KEINE_ANFORDERUNG causes the car to fault into park, so both branches below put a ramp in
     # between: disengaging always ramps, and while engaged a release ramps until 5 kph
-    # NOTE: ANFAHREN faults TSK if the hold manager isn't holding
+    # NOTE: this allows KEINE_ANFORDERUNG -> ANFAHREN, but we haven't observed a fault due to this yet
     # TODO: camera can send 7 on disengage at a stop which we don't fully understand yet
     stopping = CC.actuators.longControlState == LongCtrlState.stopping
-    # HMS_Status leaves holding as soon as we send anfahren, so keep driving off until we leave standstill
-    driving_off = self.prev_acc_hold_type == self.acc_hold_type_vals['ANFAHREN'] and CS.esp_standstill
-    starting = CC.actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or driving_off)
+    starting = CC.actuators.longControlState == LongCtrlState.pid and CS.esp_hold_confirmation
     long_active = CC.longActive and not CS.out.accFaulted  # catches it one frame earlier, not sure if needed
 
     if not long_active:
@@ -141,14 +139,15 @@ class MebLongStateMachine:
     acc_status = self._get_acc_status(CS, CC)
     acc_hold_type = self._get_hold_type(CS, CC)
 
-    # transition to inactive accel and jerks as soon as we enter ESP standstill
+    # transition to inactive accel and jerks once the hold manager is holding the car,
+    # going inactive before then permanently faults TSK
     requesting_hold = acc_hold_type == self.acc_hold_type_vals['HALTEN']
-    held = requesting_hold and CS.esp_hold_confirmation
+    held = requesting_hold and CS.acc_hold_confirmation
     if not CC.enabled or held:
       accel = self.CCP.ACCEL_INACTIVE
 
-    # hold requested but the car hasn't reached standstill yet
-    braking_to_stop = requesting_hold and not CS.esp_hold_confirmation
+    # hold requested but the hold manager isn't holding the car yet
+    braking_to_stop = requesting_hold and not CS.acc_hold_confirmation
 
     # driving off from a hold
     leaving_standstill = acc_hold_type == self.acc_hold_type_vals['ANFAHREN']
