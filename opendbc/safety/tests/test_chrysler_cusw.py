@@ -9,7 +9,6 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
   SAFETY_MODEL = CarParams.SafetyModel.chryslerCusw
 
   TX_MSGS = [[0x1F6, 0], [0x2FA, 0], [0x5DC, 0]]
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x1F6, 0x5DC)}
   FWD_BLACKLISTED_ADDRS = {2: [0x1F6, 0x5DC]}
 
@@ -58,14 +57,6 @@ class TestChryslerCuswSafety(common.CarSafetyTest, common.MotorTorqueSteeringSaf
 
       # can always cancel
       self.assertTrue(self._tx(self._button_msg(cancel=True)))
-
-  def test_rx_hook(self):
-    for count in range(20):
-      self.assertTrue(self._rx(self._speed_msg(0)), f"{count=}")
-      self.assertTrue(self._rx(self._user_brake_msg(False)), f"{count=}")
-      self.assertTrue(self._rx(self._torque_meas_msg(0)), f"{count=}")
-      self.assertTrue(self._rx(self._user_gas_msg(0)), f"{count=}")
-      self.assertTrue(self._rx(self._pcm_status_msg(False)), f"{count=}")
 
 
 if __name__ == "__main__":

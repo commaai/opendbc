@@ -85,8 +85,6 @@ UBSAN_EXIT_CODE = 86  # a child stopped by UBSan exits with this (see PRELUDE), 
 CRASH_SIGNALS = {signal.SIGSEGV, signal.SIGBUS, signal.SIGFPE, signal.SIGILL, signal.SIGABRT, signal.SIGTRAP}
 CPU_LIMIT_FIXTURE = 1.0  # CPU seconds a child may spend outside of tests at a time
 MEM_HEADROOM = 256 << 20  # address space a child may allocate beyond what it inherits (Linux only)
-# TODO: kill the remaining survivors and remove this. Until then, the run fails only if more mutants survive than this.
-MAX_SURVIVORS = 83
 RED, GREEN, YELLOW, BOLD = "31", "32", "33", "1"
 
 
@@ -565,7 +563,7 @@ def main():
   print(f"  avg_test_per_mutant: {test_sec / len(sites):.3f}s")
   print(f"  mutants_per_second: {len(sites) / elapsed:.2f}")
   print(f"  elapsed: {elapsed:.2f}s")
-  return 2 if counts[INFRA] else 1 if counts[SURVIVED] + counts[UNCOVERED] > MAX_SURVIVORS else 0
+  return 2 if counts[INFRA] else 1 if counts[SURVIVED] + counts[UNCOVERED] else 0
 
 
 if __name__ == "__main__":

@@ -44,11 +44,11 @@ static void hyundai_common_cruise_state_check(const bool cruise_engaged) {
 
   // enter controls on rising edge of ACC and recent user button press, exit controls when ACC off
   if (cruise_engaged && !safety.cruise_engaged_prev && (safety.hyundai_last_button_interaction < HYUNDAI_PREV_BUTTON_SAMPLES)) {
-    safety.controls_allowed = true;
+    enter_controls();
   }
 
   if (!cruise_engaged) {
-    safety.controls_allowed = false;
+    exit_controls();
   }
   safety.cruise_engaged_prev = cruise_engaged;
 }
@@ -65,12 +65,12 @@ static void hyundai_common_cruise_buttons_check(const uint8_t cruise_button, con
     bool set = (cruise_button != HYUNDAI_BTN_SET) && (safety.cruise_button_prev == HYUNDAI_BTN_SET);
     bool res = (cruise_button != HYUNDAI_BTN_RESUME) && (safety.cruise_button_prev == HYUNDAI_BTN_RESUME);
     if (set || res) {
-      safety.controls_allowed = true;
+      enter_controls();
     }
 
     // exit controls on cancel press
     if (cruise_button == HYUNDAI_BTN_CANCEL) {
-      safety.controls_allowed = false;
+      exit_controls();
     }
 
     safety.cruise_button_prev = cruise_button;

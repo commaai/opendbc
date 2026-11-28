@@ -148,16 +148,24 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
   // sample speed
   if (msg_matches(msg, 0xaaU, 0U)) {
     int speed = 0;
+    bool moving = false;
     // sum 4 wheel speeds. conversion: raw * 0.01 - 67.67
     for (int i = 0; i < 8; i += 2) {
-      uint32_t wheel_speed = GET_BYTES_BE(msg, i, 2) & 0x7FFFU;
-      speed += (int)wheel_speed - 6767;
+      uint32_t wheel_speed_raw = GET_BYTES_BE(msg, i, 2) & 0x7FFFU;
+      int wheel_speed = (int)wheel_speed_raw - 6767;
+      speed += wheel_speed;
+      // moving if any wheel turns, either way, even when the speeds sum to zero
+      moving = moving || (wheel_speed != 0);
     }
-    // check that all wheel speeds are at zero value
-    safety.vehicle_moving = speed != 0;
+    safety.vehicle_moving = moving;
 
     UPDATE_VEHICLE_SPEED((float)speed / 4.0f * 0.01f * KPH_TO_MS);
   }
+}
+
+// true if both the smallest and largest recent samples are beyond +/-limit
+static bool toyota_torque_over_limit(const struct sample_t *sample, const int limit) {
+  return safety_max_limit_check(sample->min, limit, -limit) && safety_max_limit_check(sample->max, limit, -limit);
 }
 
 static bool toyota_tx_hook(const CANPacket_t *msg) {
@@ -282,13 +290,11 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       }
 
       // check if we should wind down torque
-      int driver_torque = safety_min_int(safety_abs_int(safety.torque_driver.min), safety_abs_int(safety.torque_driver.max));
-      if ((driver_torque > TOYOTA_LTA_MAX_DRIVER_TORQUE) && (torque_wind_down != 0U)) {
+      if (toyota_torque_over_limit(&safety.torque_driver, TOYOTA_LTA_MAX_DRIVER_TORQUE) && (torque_wind_down != 0U)) {
         tx = false;
       }
 
-      int eps_torque = safety_min_int(safety_abs_int(safety.torque_meas.min), safety_abs_int(safety.torque_meas.max));
-      if ((eps_torque > TOYOTA_LTA_MAX_MEAS_TORQUE) && (torque_wind_down != 0U)) {
+      if (toyota_torque_over_limit(&safety.torque_meas, TOYOTA_LTA_MAX_MEAS_TORQUE) && (torque_wind_down != 0U)) {
         tx = false;
       }
     }
