@@ -76,6 +76,7 @@ class CarState(CarStateBase):
 
     if self.CP.flags & VolkswagenFlags.KOMBI_PRESENT:
       self.upscale_lead_car_signal = bool(pt_cp.vl["Kombi_03"]["KBI_Variante"])  # Analog vs digital instrument cluster
+      ret.fuelGauge = pt_cp.vl["Kombi_03"]["KBI_Tankfuellstand_Prozent"] / 100
 
     self.parse_wheel_speeds(ret,
       pt_cp.vl["ESP_19"]["ESP_VL_Radgeschw_02"],
