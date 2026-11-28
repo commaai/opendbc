@@ -221,7 +221,7 @@ VAL_ 450 EPB_STATE 3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged" ;
 VAL_ 780 CRUISE_SPEED 255 "no_speed" 252 "stopped";
 VAL_ 780 HUD_LEAD 3 "acc_off" 2 "solid_car" 1 "dashed_car" 0 "no_car";
 VAL_ 862 SPEED_LIMIT_INDEX 0 "NO_SIGN";
-VAL_ 862 SPEED_LIMIT_TYPE 0 "Europe" 2 "Japan" 3 "USA" 4 "Canada" 6 "North America";
+VAL_ 862 SPEED_LIMIT_TYPE 0 "Europe" 1 "No Sign" 2 "Japan" 3 "USA" 4 "Canada" 6 "North America";
 VAL_ 862 ROAD_SIGN 0 "NO_SIGN" 89 "STOP_SIGN";
 VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not_detected" 79 "fasten_seatbelt" 111 "lkas_problem" 131 "brake_system_problem" 132 "brake_hold_problem" 139 "tbd" 161 "door_open";
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off";
